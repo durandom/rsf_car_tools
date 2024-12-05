@@ -58,6 +58,7 @@ class Car:
         self.model = ''
         self.year = ''
         self.shifter_type = ''
+
 class Rsf:
     def __init__(self, rsf_path: str):
         """Initialize RSF configuration handler
@@ -83,6 +84,7 @@ class Rsf:
         self._load_rbr_ini()
         self._load_cars_json()
         self._load_cars_data_json()
+        self.drive_map = self._build_drive_map()
         self._log_cars_statistics()
 
     def _validate_files(self) -> None:
@@ -172,9 +174,8 @@ class Rsf:
                 try:
                     weight = float(car.weight.lower().replace('kg', '').strip())
                     steering = float(car.steering_wheel)
-                    # Encode drivetrain (RWD=1, FWD=2, AWD=3)
-                    drive_map = {'RWD': 1, 'FWD': 2, 'AWD': 3}
-                    drivetrain = drive_map.get(car.drive_train.upper(), 0)
+                    # Use pre-built drivetrain mapping
+                    drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
 
                     if weight > 0 and steering > 0 and drivetrain > 0:
                         features.append([weight, steering, drivetrain])
@@ -189,8 +190,8 @@ class Rsf:
         # Create pipeline with scaling, polynomial features, and regression
         model = Pipeline([
             ('scaler', StandardScaler()),
-            ('poly', PolynomialFeatures(degree=2)),
-            ('regressor', LinearRegression())
+            ('poly', PolynomialFeatures(degree=1)),  # Linear features only
+            ('regressor', LinearRegression(fit_intercept=True))
         ])
 
         return model
@@ -218,29 +219,36 @@ class Rsf:
 
         return models
 
+    def _build_drive_map(self) -> Dict[str, int]:
+        """Build mapping of drivetrains to numeric values based on available cars"""
+        drive_types = sorted(set(car.drive_train.upper() for car in self.cars.values()
+                               if car.drive_train))
+        drive_map = {dt: idx + 1 for idx, dt in enumerate(drive_types)}
+        logger.debug(f"Built drivetrain mapping: {drive_map}")
+        return drive_map
+
     def predict_ffb_settings(self, car: Car, models: dict) -> Tuple[int, int, int]:
         """Predict FFB settings for a car using trained models"""
         try:
             # Extract features
             weight = float(car.weight.lower().replace('kg', '').strip())
             steering = float(car.steering_wheel)
-            drive_map = {'RWD': 1, 'FWD': 2, 'AWD': 3}
-            drivetrain = drive_map.get(car.drive_train.upper(), 0)
+            drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
 
             if weight <= 0 or steering <= 0 or drivetrain <= 0:
                 return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
 
             features = np.array([[weight, steering, drivetrain]])
 
-            # Predict for each surface
-            ffb_tarmac = int(round(models['tarmac'].predict(features)[0]))
-            ffb_gravel = int(round(models['gravel'].predict(features)[0]))
-            ffb_snow = int(round(models['snow'].predict(features)[0]))
+            # Predict for each surface and ensure reasonable values
+            predictions = []
+            for surface in ['tarmac', 'gravel', 'snow']:
+                pred = models[surface].predict(features)[0]
+                # Clip prediction to reasonable range (50-2000)
+                pred = max(50, min(2000, pred))
+                predictions.append(int(round(pred)))
 
-            # Clamp values to valid range (0-200)
-            ffb_tarmac = max(0, min(200, ffb_tarmac))
-            ffb_gravel = max(0, min(200, ffb_gravel))
-            ffb_snow = max(0, min(200, ffb_snow))
+            ffb_tarmac, ffb_gravel, ffb_snow = predictions
 
             return (ffb_tarmac, ffb_gravel, ffb_snow)
 
