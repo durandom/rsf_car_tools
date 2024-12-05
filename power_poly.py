@@ -572,12 +572,16 @@ class Rsf:
             # Select specified number of cars from cluster
             n_select = min(min_cars_per_cluster, cluster_size)  # Can't select more cars than exist in cluster
 
-            # Randomly select cars from cluster
-            selected_indices = np.random.choice(
-                cluster_indices,
-                size=n_select,
-                replace=False
-            )
+            # Get cluster center
+            cluster_center = kmeans.cluster_centers_[cluster_id]
+
+            # Calculate distances to cluster center for all points in this cluster
+            cluster_points = features_scaled[cluster_indices]
+            distances = np.linalg.norm(cluster_points - cluster_center, axis=1)
+
+            # Get indices of n_select closest points to center
+            closest_in_cluster = np.argsort(distances)[:n_select]
+            selected_indices = cluster_indices[closest_in_cluster]
 
             for idx in selected_indices:
                 car = valid_cars[idx]
