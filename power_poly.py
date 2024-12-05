@@ -86,6 +86,7 @@ class Car:
         self.model = ''
         self.year = ''
         self.shifter_type = ''
+        self.cluster = None  # Store which cluster this car belongs to
 
 class Rsf:
     def __init__(self, rsf_path: str):
@@ -502,11 +503,34 @@ class Rsf:
             logger.warning(f"Could not predict FFB settings for car {car.id}: {str(e)}")
             return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
 
-    def select_training_sample(self, sample_size: int = 20) -> List[Car]:
+    def _find_optimal_clusters(self, features_scaled: np.ndarray) -> int:
+        """Find optimal number of clusters using elbow method.
+
+        Args:
+            features_scaled: Normalized feature matrix
+
+        Returns:
+            Optimal number of clusters
+        """
+        max_clusters = min(10, len(features_scaled) // 5)  # Don't try more than n/5 clusters
+        distortions = []
+
+        for k in range(1, max_clusters + 1):
+            kmeans = KMeans(n_clusters=k, random_state=42)
+            kmeans.fit(features_scaled)
+            distortions.append(kmeans.inertia_)
+
+        # Find elbow point using second derivative
+        diffs = np.diff(distortions, 2)  # Second derivative
+        elbow_idx = int(np.argmin(diffs)) + 2  # Add 2 due to double diff
+
+        return elbow_idx + 1  # Add 1 since we started at k=1
+
+    def select_training_sample(self, min_cars_per_cluster: int = 3) -> List[Car]:
         """Select a representative sample of cars using clustering.
 
         Args:
-            sample_size: Target number of cars to select
+            min_cars_per_cluster: Minimum number of cars to select from each cluster
 
         Returns:
             List of selected Car objects
@@ -530,8 +554,9 @@ class Rsf:
         scaler = MinMaxScaler()
         features_scaled = scaler.fit_transform(features)
 
-        # Determine number of clusters (roughly sample_size/2)
-        n_clusters = max(3, sample_size // 2)
+        # Find optimal number of clusters
+        n_clusters = self._find_optimal_clusters(features_scaled)
+        logger.debug(f"Determined optimal number of clusters: {n_clusters}")
 
         # Perform clustering
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
@@ -542,34 +567,134 @@ class Rsf:
         for cluster_id in range(n_clusters):
             # Get indices of cars in this cluster
             cluster_indices = np.where(clusters == cluster_id)[0]
-
-            # Select cars from cluster (more from larger clusters)
             cluster_size = len(cluster_indices)
-            n_select = max(1, int(cluster_size * sample_size / len(features)))
+
+            # Select specified number of cars from cluster
+            n_select = min(min_cars_per_cluster, cluster_size)  # Can't select more cars than exist in cluster
 
             # Randomly select cars from cluster
             selected_indices = np.random.choice(
                 cluster_indices,
-                size=min(n_select, cluster_size),
+                size=n_select,
                 replace=False
             )
 
             for idx in selected_indices:
-                selected_cars.append(valid_cars[idx])
+                car = valid_cars[idx]
+                car.cluster = cluster_id  # Add cluster ID to car object
+                selected_cars.append(car)
 
         logger.info(f"Selected {len(selected_cars)} cars from {n_clusters} clusters")
-
         return selected_cars
 
     def display_selected_sample(self, selected_cars: List[Car]) -> None:
-        """Display details of selected car sample
+        """Display details of selected car sample and cluster statistics
 
         Args:
             selected_cars: List of selected Car objects
         """
         console = Console()
 
-        table = Table(title="Selected Training Sample", show_header=True)
+        # First display cluster statistics
+        cluster_stats = Table(title="Cluster Statistics", show_header=True)
+        cluster_stats.add_column("Cluster", justify="right", style="magenta")
+        cluster_stats.add_column("Size", justify="right")
+        cluster_stats.add_column("Avg Weight", justify="right")
+        cluster_stats.add_column("Avg Steering", justify="right")
+        cluster_stats.add_column("Drivetrain Distribution")
+
+        # Calculate statistics per cluster using all valid cars
+        from collections import defaultdict
+        cluster_data = defaultdict(list)
+
+        # First get all valid cars and their clusters
+        features = []
+        valid_cars = []
+        for car in self.cars.values():
+            feature_values = self._extract_feature_values(car)
+            if feature_values:
+                features.append(feature_values)
+                valid_cars.append(car)
+
+        # Perform clustering on all valid cars
+        features = np.array(features)
+        scaler = MinMaxScaler()
+        features_scaled = scaler.fit_transform(features)
+        n_clusters = self._find_optimal_clusters(features_scaled)
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        clusters = kmeans.fit_predict(features_scaled)
+
+        # Assign clusters to all valid cars
+        for car, cluster_id in zip(valid_cars, clusters):
+            car.cluster = cluster_id
+            cluster_data[cluster_id].append(car)
+
+        for cluster_id, cars in sorted(cluster_data.items()):
+            # Calculate weight range
+            weights = [car.weight for car in cars]
+            min_weight = min(weights)
+            max_weight = max(weights)
+            weight_dist = f"{min_weight}-{max_weight} kg"
+
+            # Calculate steering range
+            steering = [car.steering_wheel for car in cars]
+            min_steering = min(steering)
+            max_steering = max(steering)
+            steering_dist = f"{min_steering}-{max_steering}°"
+
+            # Count drivetrains
+            drive_counts = defaultdict(int)
+            for car in cars:
+                drive_counts[car.drive_train] += 1
+            drive_dist = ", ".join(f"{dt}: {count}" for dt, count in drive_counts.items())
+
+            cluster_stats.add_row(
+                str(cluster_id),
+                str(len(cars)),
+                weight_dist,
+                steering_dist,
+                drive_dist
+            )
+
+        # Add summary row with distribution ranges
+        total_cars = sum(len(cars) for cars in cluster_data.values())
+
+        # Calculate weight distribution
+        all_weights = [car.weight for cars in cluster_data.values() for car in cars]
+        min_weight = min(all_weights)
+        max_weight = max(all_weights)
+        weight_dist = f"{min_weight}-{max_weight} kg"
+
+        # Calculate steering distribution
+        all_steering = [car.steering_wheel for cars in cluster_data.values() for car in cars]
+        min_steering = min(all_steering)
+        max_steering = max(all_steering)
+        steering_dist = f"{min_steering}-{max_steering}°"
+
+        # Count all drivetrains
+        all_drive_counts = defaultdict(int)
+        for cars in cluster_data.values():
+            for car in cars:
+                all_drive_counts[car.drive_train] += 1
+        all_drive_dist = ", ".join(f"{dt}: {count}" for dt, count in sorted(all_drive_counts.items()))
+
+        # Add summary row with different style
+        cluster_stats.add_row(
+            "Total",
+            str(total_cars),
+            weight_dist,
+            steering_dist,
+            all_drive_dist,
+            style="bold cyan"
+        )
+
+        console.print("\n")
+        console.print(cluster_stats)
+        console.print("\n")
+
+        # Then display selected cars
+        table = Table(title=f"Selected Training Sample ({len(cluster_data)} clusters)", show_header=True)
+        table.add_column("Cluster", justify="right", style="magenta")
         table.add_column("Car", style="cyan")
         table.add_column("Weight", justify="right")
         table.add_column("Steering", justify="right")
@@ -578,6 +703,7 @@ class Rsf:
 
         for car in selected_cars:
             table.add_row(
+                str(car.cluster),
                 car.model,
                 f"{car.weight}",
                 f"{car.steering_wheel}°",
@@ -689,8 +815,8 @@ def main():
     parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
     parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
     parser.add_argument('--undriven', action='store_true', help='List undriven cars')
-    parser.add_argument('--select-sample', type=int, nargs='?', const=5, default=None, metavar='N',
-                       help='Select N cars as a training sample (default: 5)')
+    parser.add_argument('--select-sample', type=int, nargs='?', const=3, default=None, metavar='N',
+                       help='Select N cars from each cluster for training sample (default: 3)')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
