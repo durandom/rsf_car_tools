@@ -701,14 +701,23 @@ class Rsf:
         table.add_column("Drivetrain")
         table.add_column("FFB (T/G/S)", justify="right")
 
+        current_cluster = None
         for car in selected_cars:
+            # Check if we're starting a new cluster
+            if current_cluster != car.cluster:
+                current_cluster = car.cluster
+                if current_cluster is not None:
+                    # Alternate between dark grey and default background
+                    row_style = "on grey30" if current_cluster % 2 == 0 else None
+
             table.add_row(
                 str(car.cluster),
                 car.model,
                 f"{car.weight}",
                 f"{car.steering_wheel}°",
                 car.drive_train,
-                f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+                f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}",
+                style=row_style
             )
 
         self.console.print("\n")
