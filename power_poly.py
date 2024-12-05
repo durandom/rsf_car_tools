@@ -373,6 +373,24 @@ class Rsf:
         self.console.print(table)
         self.console.print("\n")
 
+        # Display undriven cars table
+        undriven_table = Table(title="Undriven Cars", show_header=True)
+        undriven_table.add_column("Car", style="cyan")
+        undriven_table.add_column("Weight", justify="right")
+        undriven_table.add_column("Steering", justify="right")
+        undriven_table.add_column("Drivetrain")
+
+        for car in sorted(self.undriven_cars.values(), key=lambda x: x.name):
+            undriven_table.add_row(
+                f"{car.id} - {car.name}",
+                str(car.weight),
+                f"{car.steering_wheel}°",
+                car.drive_train
+            )
+
+        self.console.print(undriven_table)
+        self.console.print("\n")
+
         # Display cars with custom FFB settings
         custom_ffb_table = Table(title="Cars with Custom FFB Settings", show_header=True)
         custom_ffb_table.add_column("Car", style="cyan")
