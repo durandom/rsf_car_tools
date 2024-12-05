@@ -28,8 +28,9 @@ class Rsf:
 
         self._validate_files()
         self.cars: Dict[str, Car] = {}
-        self._load_cars()
-        self._augment_cars_with_json()
+        self._load_personal_ini()
+        self._load_cars_json()
+        self._load_cars_data_json()
 
     def _validate_files(self) -> None:
         """Validate all required files exist"""
@@ -62,7 +63,7 @@ class Rsf:
             logger.error(f"Error parsing {file}: {str(e)}")
             exit(1)
 
-    def _augment_cars_with_json(self) -> None:
+    def _load_cars_json(self) -> None:
         """Load cars.json and add data to existing Car objects"""
         try:
             with open(self.cars_json, 'r', encoding='utf-8') as f:
@@ -86,7 +87,43 @@ class Rsf:
         except Exception as e:
             logger.error(f"Error loading cars.json: {str(e)}")
 
-    def _load_cars(self) -> None:
+    def _load_cars_data_json(self) -> None:
+        """Load cars_data.json and add technical data to existing Car objects"""
+        encodings = ['utf-8', 'latin1', 'cp1252']
+
+        for encoding in encodings:
+            try:
+                with open(self.cars_data_json, 'r', encoding=encoding) as f:
+                    cars_data_json = json.load(f)
+                    for car_data in cars_data_json:
+                        car_id = car_data['car_id']
+                        if car_id in self.cars:
+                            car = self.cars[car_id]
+                            # Add technical data attributes to existing Car object
+                            car.power = car_data.get('power', '')
+                            car.torque = car_data.get('torque', '')
+                            car.drive_train = car_data.get('drive_train', '')
+                            car.engine = car_data.get('engine', '')
+                            car.transmission = car_data.get('transmission', '')
+                            car.weight = car_data.get('weight', '')
+                            car.wdf = car_data.get('wdf', '')
+                            car.steering_wheel = car_data.get('steering_wheel', '')
+                            car.skin = car_data.get('skin', '')
+                            car.model = car_data.get('model', '')
+                            car.year = car_data.get('year', '')
+                            car.shifter_type = car_data.get('shifterType', '')
+                            logger.debug(f"Added technical data to car {car_id}")
+                    logger.debug(f"Successfully loaded cars_data.json with {encoding} encoding")
+                    return
+            except UnicodeDecodeError:
+                continue
+            except Exception as e:
+                logger.error(f"Error loading cars_data.json: {str(e)}")
+                return
+
+        logger.error("Failed to load cars_data.json with any supported encoding")
+
+    def _load_personal_ini(self) -> None:
         """Load car configurations from personal.ini"""
         config = self.config_parser(self.personal_ini)
 
@@ -129,6 +166,20 @@ class Car:
         self.rev = ''
         self.audio = None
         self.audio_hash = ''
+
+        # Car data attributes
+        self.power = ''
+        self.torque = ''
+        self.drive_train = ''
+        self.engine = ''
+        self.transmission = ''
+        self.weight = ''
+        self.wdf = ''
+        self.steering_wheel = ''
+        self.skin = ''
+        self.model = ''
+        self.year = ''
+        self.shifter_type = ''
 
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power polygon settings')
