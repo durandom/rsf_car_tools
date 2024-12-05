@@ -373,6 +373,29 @@ class Rsf:
         self.console.print(table)
         self.console.print("\n")
 
+        # Display cars with custom FFB settings
+        custom_ffb_table = Table(title="Cars with Custom FFB Settings", show_header=True)
+        custom_ffb_table.add_column("Car", style="cyan")
+        custom_ffb_table.add_column("Weight", justify="right")
+        custom_ffb_table.add_column("Steering", justify="right")
+        custom_ffb_table.add_column("Drivetrain")
+        custom_ffb_table.add_column("FFB Settings (T/G/S)", justify="right")
+        custom_ffb_table.add_column("Global FFB", justify="right")
+
+        for car in sorted(self.cars.values(), key=lambda x: x.name):
+            if self.has_custom_ffb(car):
+                custom_ffb_table.add_row(
+                    f"{car.id} - {car.name}",
+                    str(car.weight),
+                    f"{car.steering_wheel}°",
+                    car.drive_train,
+                    f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}",
+                    f"{self.ffb_tarmac}/{self.ffb_gravel}/{self.ffb_snow}"
+                )
+
+        self.console.print(custom_ffb_table)
+        self.console.print("\n")
+
     def _extract_feature_values(self, car: Car) -> Optional[List[float]]:
         """Extract feature values from a car.
 
