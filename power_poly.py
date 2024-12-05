@@ -5,6 +5,7 @@ from io import StringIO
 from configobj import ConfigObj
 from typing import List, Tuple, Dict, Optional
 from loguru import logger
+import plotext as plt
 
 def setup_logging(verbose: bool) -> None:
     """Configure logging level based on verbosity"""
@@ -98,10 +99,34 @@ class Rsf:
         """Log statistics about loaded cars"""
         total_cars = len(self.cars)
         ffb_cars = sum(1 for car in self.cars.values()
-                      if (car.ffb_tarmac != self.ffb_tarmac or 
-                          car.ffb_gravel != self.ffb_gravel or 
+                      if (car.ffb_tarmac != self.ffb_tarmac or
+                          car.ffb_gravel != self.ffb_gravel or
                           car.ffb_snow != self.ffb_snow))
         logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
+
+    def plot_weight_stats(self):
+        """Plot histogram of car weights"""
+        # Extract weights, converting to float and filtering out empty/invalid
+        weights = []
+        for car in self.cars.values():
+            try:
+                if car.weight:
+                    # Remove 'kg' suffix if present and convert to float
+                    weight = float(car.weight.lower().replace('kg', '').strip())
+                    weights.append(weight)
+            except ValueError:
+                continue
+
+        if not weights:
+            logger.error("No valid weight data found")
+            return
+
+        plt.clear_figure()
+        plt.hist(weights, bins=20)
+        plt.title("Car Weight Distribution")
+        plt.xlabel("Weight (kg)")
+        plt.ylabel("Number of Cars")
+        plt.show()
 
     def _load_cars_data_json(self) -> None:
         """Load cars_data.json and add technical data to existing Car objects"""
@@ -212,12 +237,18 @@ def main():
     parser = argparse.ArgumentParser(description='Modify RSF power polygon settings')
     parser.add_argument('rsf_path', help='Path to RSF installation directory')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable debug logging')
+    parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
 
     try:
         rsf = Rsf(args.rsf_path)
+
+        if args.stats:
+            stats_list = [s.strip().lower() for s in args.stats.split(',')]
+            if 'weight' in stats_list:
+                rsf.plot_weight_stats()
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
         return 1
