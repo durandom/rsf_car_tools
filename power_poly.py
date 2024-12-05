@@ -3,6 +3,7 @@ import argparse
 from io import StringIO
 from configobj import ConfigObj
 from typing import List, Tuple, Dict
+from loguru import logger
 
 class Rsf:
     def __init__(self, rsf_path: str):
@@ -50,7 +51,7 @@ class Rsf:
             return config
 
         except Exception as e:
-            print(f"Error parsing {file}: {str(e)}")
+            logger.error(f"Error parsing {file}: {str(e)}")
             exit(1)
 
     def _load_cars(self) -> None:
@@ -64,8 +65,11 @@ class Rsf:
             car_id = section_name[3:]  # Remove 'car' prefix
             # Get section data and ensure string types
             section = config[section_name]
+            # make sure section is a dictionary
+            if not isinstance(section, dict):
+                continue
             car_data = {str(k): str(v) for k, v in section.items()}
-            print(car_id, car_data)
+            logger.debug(f"Loaded car configuration: {car_id} - {car_data}")
             self.cars[car_id] = Car(car_id, car_data)
 
 class Car:
@@ -91,7 +95,7 @@ def main():
     try:
         rsf = Rsf(args.rsf_path)
     except FileNotFoundError as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
         return 1
 
     return 0
