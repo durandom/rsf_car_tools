@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+.r1 {font-style: italic}
+.r2 {font-weight: bold}
+.r3 {color: #008080; text-decoration-color: #008080}
+.r4 {color: #008000; text-decoration-color: #008000}
+.r5 {color: #800080; text-decoration-color: #800080}
+.r6 {color: #008080; text-decoration-color: #008080; font-weight: bold}
+.r7 {color: #800080; text-decoration-color: #800080; background-color: #4e4e4e}
+.r8 {color: #008080; text-decoration-color: #008080; background-color: #4e4e4e}
+.r9 {background-color: #4e4e4e}
+body {
+    color: #000000;
+    background-color: #ffffff;
+}
+</style>
+</head>
+<body>
+    <pre style="font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><code style="font-family:inherit">
+
+<span class="r1">         Car Statistics         </span>
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃<span class="r2"> Metric               </span>┃<span class="r2"> Count </span>┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│<span class="r3"> Total Cars           </span>│<span class="r4">    82 </span>│
+│<span class="r3"> Cars with Custom FFB </span>│<span class="r4">     4 </span>│
+│<span class="r3"> Undriven Cars        </span>│<span class="r4">    17 </span>│
+└──────────────────────┴───────┘
+
+
+
+
+<span class="r1">                                                      Cluster Statistics                                                       </span>
+┏━━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃<span class="r2"> Cluster </span>┃<span class="r2"> Size </span>┃<span class="r2">   Avg Weight </span>┃<span class="r2"> Avg Steering </span>┃<span class="r2"> Drivetrain Distribution                                                      </span>┃
+┡━━━━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│<span class="r5">       0 </span>│   12 │ 1119-1280 kg │    885-1116° │ FWD: 12                                                                      │
+│<span class="r5">       1 </span>│   27 │ 1390-1430 kg │     428-619° │ AWD w/o torque split (50:50): 23, AWD with torque split: 4                   │
+│<span class="r5">       2 </span>│   16 │ 1020-1430 kg │    864-1080° │ RWD: 16                                                                      │
+│<span class="r5">       3 </span>│    6 │ 1300-1449 kg │     842-958° │ AWD with torque split: 1, AWD w/o torque split (50:50): 5                    │
+│<span class="r5">       4 </span>│    9 │ 1230-1349 kg │     720-763° │ FWD: 8, RWD: 1                                                               │
+│<span class="r5">       5 </span>│    6 │ 1319-1610 kg │     720-778° │ AWD w/o torque split (50:50): 5, AWD with torque split: 1                    │
+│<span class="r5">       6 </span>│    6 │  729-1005 kg │    756-1080° │ FWD: 5, RWD: 1                                                               │
+│<span class="r6">   Total </span>│<span class="r6">   82 </span>│<span class="r6">  729-1610 kg </span>│<span class="r6">    428-1116° </span>│<span class="r6"> AWD w/o torque split (50:50): 33, AWD with torque split: 6, FWD: 25, RWD: 18 </span>│
+└─────────┴──────┴──────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────┘
+
+
+
+
+<span class="r1">                                                          Selected Training Sample (7 clusters)                                                          </span>
+┏━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
+┃<span class="r2"> Cluster </span>┃<span class="r2"> Car                                                                     </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetrain                   </span>┃<span class="r2">    FFB (T/G/S) </span>┃
+┡━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
+│<span class="r7">       0 </span>│<span class="r8"> Garyson (2015 EcoBoost) v1.1, fixed v1.2 by WorkerBee                   </span>│<span class="r9">   1230 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Renault Twingo R2 V1.1 by DMRally74 &amp; Roysteph                          </span>│<span class="r9">   1230 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Peugeot 208 R2 V1.0 by DMRally74                                        </span>│<span class="r9">   1230 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> C2 R2 Max v1.1 by Roysteph &amp; Ricardo fix by WorkerBee                   </span>│<span class="r9">   1230 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> OPEL ADAM R2 V1.0 by DMRally74                                          </span>│<span class="r9">   1230 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Renault Twingo R1 V1.1 by DMRally74 &amp; Roysteph                          </span>│<span class="r9">   1230 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Renault Clio v1.1 by Nico77 &amp; Roysteph &amp; Flat-twin &amp; WorkerBee          </span>│<span class="r9">   1190 </span>│<span class="r9">     900° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Citroen DS3 R1 V2.1 by DMRally74 &amp; Roysteph &amp; WorkerBee                 </span>│<span class="r9">   1230 </span>│<span class="r9">    1080° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Peugeot 306 Maxi Kit Car v1.1 by gonzo_kool &amp; DMRally74                 </span>│<span class="r9">   1160 </span>│<span class="r9">     885° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> Citroen Xsara Kit Car V1.0 by DMRally74                                 </span>│<span class="r9">   1160 </span>│<span class="r9">     885° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> VW Golf II GTI 16V GrpA v1.2 by Ha3aP, fixed v1.3 by WorkerBee          </span>│<span class="r9">   1119 </span>│<span class="r9">    1092° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1200/1200/1100 </span>│
+│<span class="r7">       0 </span>│<span class="r8"> kalina_rc2 2016-02-12 by Garyson, fixed v1.4 by WorkerBee               </span>│<span class="r9">   1280 </span>│<span class="r9">    1116° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r5">       1 </span>│<span class="r3"> Citroen Xsara WRC 2006 by eddy3spain &amp; rivers                           </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1568/1568/1348 │
+│<span class="r5">       1 </span>│<span class="r3"> Peugeot 208 T16 R5 EVO v1.2 (2023-03-13) by Kubrt                       </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Citroen C3 R5 v1.1 by Ha3aP &amp; Rodriguez, fixed v1.2 by WorkerBee        </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> DS3 R5 2015 V2.1 by Garyson, fixed v2.2 by WorkerBee                    </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> SKODA FABIA R5 evo v1.0 by Ha3aP, fixed v1.3 by WorkerBee               </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> SKODA FABIA R5 2018 v1.0 by Ha3aP, fixed v1.3 by WorkerBee              </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> i20 R5 by Rodriguez &amp; Antonelli                                         </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Ford Focus WRC 2006 v1.3 by JRodrigues &amp; eddy3spain fix by WorkerBee    </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> CITROEN C4 08 WRC v1.1 by Kubrt fix by WorkerBee                        </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> VW Polo GTi R5 v1.3 by Ha3aP, fixed v1.5 by WorkerBee                   </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1568/1568/1348 │
+│<span class="r5">       1 </span>│<span class="r3"> Kubrt version 1.0 2015-03-22                                            </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Subaru Impreza WRC 2003 by Kazhol                                       </span>│   1430 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> CITROEN DS3 WRC 2015 by Garyson/Antonelli 2015-10-02                    </span>│   1400 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Fiat Grande Punto ver.2 by Garyson, fixed v2.1 by WorkerBee             </span>│   1400 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> G. Rodriguez &amp; D. Antonelli 2015-06-11                                  </span>│   1400 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> VOLKSWAGEN POLO WRC 2016, D. Antonelli &amp; A. Leiro                       </span>│   1400 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Peugeot 207 S2000 2012 v1.3 by Kubrt fix by WorkerBee                   </span>│   1400 │     540° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Ford Fiesta Rally3 by Ha3aP                                             </span>│   1410 │     565° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Ford Fiesta Rally2 2023 by G. Rodriguez &amp; D. Antonelli                  </span>│   1430 │     478° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       1 </span>│<span class="r3"> Mini JCW WRC 01B by Garyson, fixed v1.1 by WorkerBee                    </span>│   1400 │     446° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r7">       2 </span>│<span class="r8"> Opel Manta 400 by Shenshee                                              </span>│<span class="r9">   1180 </span>│<span class="r9">     972° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Porsche_911SC by MokuMoku fix by v1.1 DMRally74 fixed by v1.2 WorkerBee </span>│<span class="r9">   1190 </span>│<span class="r9">    1019° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Fiat 131 Abarth v1.1 by DMRally74                                       </span>│<span class="r9">   1230 </span>│<span class="r9">    1026° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> PORSCHE911_SCRS_GrpB by Shenshee                                        </span>│<span class="r9">   1160 </span>│<span class="r9">    1019° </span>│<span class="r9"> RWD                          </span>│<span class="r9">  1040/1040/858 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Ford Escort MkII by Ha3aP, fixed v1.1 by WorkerBee                      </span>│<span class="r9">   1180 </span>│<span class="r9">     900° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Lancia Stratos Gr.4 V1.3 by DMRally74                                   </span>│<span class="r9">   1129 </span>│<span class="r9">     900° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> BMW_M3_E30 HU by atiwrc                                                 </span>│<span class="r9">   1225 </span>│<span class="r9">     864° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Opel_Ascona_400 v1.1 by MokuMoku fixed by v1.2 WorkerBee                </span>│<span class="r9">   1250 </span>│<span class="r9">    1080° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Volvo 242 Lightspeed Edition 2007 v1.1 by RTS &amp; WorkerBee               </span>│<span class="r9">   1349 </span>│<span class="r9">    1007° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Lotus Exige v1.1 by DMRally74                                           </span>│<span class="r9">   1084 </span>│<span class="r9">     900° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> Skoda_130RS Ver1.7 (2011-12-23) by MokuMoku                             </span>│<span class="r9">   1069 </span>│<span class="r9">     900° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> PORSCHE911GT3RS_2010 by Maxime &amp; Leiro                                  </span>│<span class="r9">   1400 </span>│<span class="r9">     943° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> skoda_130LR v1.1 by MokuMoku fix by DMRally74                           </span>│<span class="r9">   1020 </span>│<span class="r9">     900° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> PORSCHE911GT3RS by Maxime                                               </span>│<span class="r9">   1430 </span>│<span class="r9">     943° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> BMW M3 e36 by Ha3aP, fixed v1.1 by WorkerBee                            </span>│<span class="r9">   1390 </span>│<span class="r9">    1080° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       2 </span>│<span class="r8"> atiwrc, Lada VFTS for RBR (NGP Version)                                 </span>│<span class="r9">   1020 </span>│<span class="r9">    1080° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r5">       3 </span>│<span class="r3"> AUDI QUATTRO A1 GrpB By Shenshee                                        </span>│   1340 │     900° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       3 </span>│<span class="r3"> AUDI QUATTRO Group4 by Shenshee                                         </span>│   1440 │     900° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       3 </span>│<span class="r3"> AUDI QUATTRO A2 GrpB Ver. 1.0 By Shenshee                               </span>│   1300 │     900° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       3 </span>│<span class="r3"> MAZDA_323_BFMR by MokuMoku                                              </span>│   1300 │     842° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       3 </span>│<span class="r3"> Audi 200 quattro by kazuma_NARU                                         </span>│   1449 │     958° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       3 </span>│<span class="r3"> eddy3spain v1.0                                                         </span>│   1420 │     864° │ AWD with torque split        │ 1500/1500/1300 │
+│<span class="r7">       4 </span>│<span class="r8"> Ford Fiesta Rally4 by Ha3aP, fixed v1.4 by WorkerBee                    </span>│<span class="r9">   1280 </span>│<span class="r9">     720° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Renault_ClioV_Rally4 V1.0 by DMRally74                                  </span>│<span class="r9">   1280 </span>│<span class="r9">     720° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Peugeot 208 Rally4 by DMRally74                                         </span>│<span class="r9">   1280 </span>│<span class="r9">     720° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Renault_ClioV_Rally4 V1.0 by DMRally74                                  </span>│<span class="r9">   1280 </span>│<span class="r9">     720° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Renault Clio 4 R3T V1.0, David74                                        </span>│<span class="r9">   1280 </span>│<span class="r9">     763° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Citroen DS3 R3 V2.1 by DMRally74 &amp; Roysteph &amp; WorkerBee                 </span>│<span class="r9">   1280 </span>│<span class="r9">     763° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Renault Clio R3 v1.1 by Johny, Wojtek, Jordan                           </span>│<span class="r9">   1280 </span>│<span class="r9">     763° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> Ford Fiesta R2 2019 by Ha3aP, fixed v1.1 by WorkerBee                   </span>│<span class="r9">   1230 </span>│<span class="r9">     720° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       4 </span>│<span class="r8"> BMW_M1 v1.2 by MokuMoku fix by DMRally74                                </span>│<span class="r9">   1349 </span>│<span class="r9">     744° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r5">       5 </span>│<span class="r3"> gonzo_kool Subaru Impreza95 v1.0                                        </span>│   1430 │     720° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       5 </span>│<span class="r3"> Alex Racer v1.21 / 2014-11-17                                           </span>│   1519 │     720° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       5 </span>│<span class="r3"> KUBRT v1.1 / 2008-09-06                                                 </span>│   1519 │     720° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       5 </span>│<span class="r3"> TOYOTA CELICA GT-FOUR RC ST185 by gonzo_kool &amp; kazuma_NARU              </span>│   1319 │     720° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       5 </span>│<span class="r3"> Impreza_N14_Pro 2009-11-30 by Garyson, fixed v1.1 by WorkerBee          </span>│   1610 │     778° │ AWD w/o torque split (50:50) │ 1500/1500/1300 │
+│<span class="r5">       5 </span>│<span class="r3"> Lancia Delta HF 4WD version 4.0 by kazuma_NARU                          </span>│   1400 │     720° │ AWD with torque split        │ 1500/1500/1300 │
+│<span class="r7">       6 </span>│<span class="r8"> Skoda Favorit 136 L GrA - v1.1 by Myra                                  </span>│<span class="r9">    939 </span>│<span class="r9">     900° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       6 </span>│<span class="r8"> Peugeot106_rally v1.3 by DMRally74                                      </span>│<span class="r9">    971 </span>│<span class="r9">     968° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       6 </span>│<span class="r8"> 5GTT by Jerome Dubedout, lfrbr team                                     </span>│<span class="r9">    974 </span>│<span class="r9">     972° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       6 </span>│<span class="r8"> Wartburg_353 by MokuMoku                                                </span>│<span class="r9">   1005 </span>│<span class="r9">    1080° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       6 </span>│<span class="r8"> MokuMoku v1.1                                                           </span>│<span class="r9">    780 </span>│<span class="r9">     756° </span>│<span class="r9"> FWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+│<span class="r7">       6 </span>│<span class="r8"> Fiat 126 version 1.2.6 2015-07-19 Frito Fixes by WorkerBee              </span>│<span class="r9">    729 </span>│<span class="r9">     835° </span>│<span class="r9"> RWD                          </span>│<span class="r9"> 1500/1500/1300 </span>│
+└─────────┴─────────────────────────────────────────────────────────────────────────┴────────┴──────────┴──────────────────────────────┴────────────────┘
+
+
+</code></pre>
+</body>
+</html>
