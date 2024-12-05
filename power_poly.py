@@ -287,7 +287,8 @@ class Rsf:
                         car = Car(car_id, {})  # Empty config since not in personal.ini
                         self.undriven_cars[car_id] = car
 
-                    car.name = car_json.get('name', '')
+                    if not car.name:
+                        car.name = car_json.get('name', '')
                     car.path = car_json.get('path', '')
                     car.hash = car_json.get('hash', '')
                     car.carmodel_id = car_json.get('carmodel_id', '')
@@ -716,7 +717,7 @@ class Rsf:
 
             table.add_row(
                 str(car.cluster),
-                f"{car.id} - {car.model}",
+                f"{car.id} - {car.name}",
                 f"{car.weight}",
                 f"{car.steering_wheel}°",
                 car.drive_train,
@@ -755,13 +756,13 @@ class Rsf:
         for car, predictions in cars_with_predictions:
             # Determine row style based on whether car has custom FFB
             row_style = "on red" if self.has_custom_ffb(car) else None
-            
+
             current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
             predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
             status = "Skipped - Custom FFB" if self.has_custom_ffb(car) else "Updated"
 
             table.add_row(
-                f"{car.id} - {car.model}",
+                f"{car.id} - {car.name}",
                 f"{car.weight}",
                 f"{car.steering_wheel}°",
                 car.drive_train,

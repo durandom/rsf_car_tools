@@ -8,8 +8,12 @@ out:
 clusters: out
 	python ./power_poly.py assets/rsf --select-sample 20 --html out/clusters.html
 
+# Run prediction analysis
+predict: out
+	python ./power_poly.py assets/rsf --generate --html out/prediction.html
+
 # Default target
-all: clusters
+all: clusters predict
 
 # Clean generated files
 clean:
