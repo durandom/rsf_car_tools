@@ -140,13 +140,23 @@ class Rsf:
         except Exception as e:
             logger.error(f"Error loading cars.json: {str(e)}")
 
+    def has_custom_ffb(self, car: Car) -> bool:
+        """Check if a car has custom FFB settings different from global defaults
+
+        Args:
+            car (Car): Car object to check
+
+        Returns:
+            bool: True if car has custom FFB settings
+        """
+        return (car.ffb_tarmac != self.ffb_tarmac or
+                car.ffb_gravel != self.ffb_gravel or
+                car.ffb_snow != self.ffb_snow)
+
     def _log_cars_statistics(self) -> None:
         """Log statistics about loaded cars"""
         total_cars = len(self.cars)
-        ffb_cars = sum(1 for car in self.cars.values()
-                      if (car.ffb_tarmac != self.ffb_tarmac or
-                          car.ffb_gravel != self.ffb_gravel or
-                          car.ffb_snow != self.ffb_snow))
+        ffb_cars = sum(1 for car in self.cars.values() if self.has_custom_ffb(car))
         logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
 
     def prepare_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -156,9 +166,7 @@ class Rsf:
 
         for car in self.cars.values():
             # Only use cars with custom FFB settings
-            if (car.ffb_tarmac != self.ffb_tarmac or
-                car.ffb_gravel != self.ffb_gravel or
-                car.ffb_snow != self.ffb_snow):
+            if self.has_custom_ffb(car):
 
                 # Extract and normalize features
                 try:
@@ -246,9 +254,7 @@ class Rsf:
         total = 0
 
         for car in self.cars.values():
-            if (car.ffb_tarmac != self.ffb_tarmac or
-                car.ffb_gravel != self.ffb_gravel or
-                car.ffb_snow != self.ffb_snow):
+            if self.has_custom_ffb(car):
 
                 pred_tarmac, pred_gravel, pred_snow = self.predict_ffb_settings(car, models)
 
