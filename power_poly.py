@@ -712,7 +712,7 @@ class Rsf:
 
             table.add_row(
                 str(car.cluster),
-                car.model,
+                f"{car.id} - {car.model}",
                 f"{car.weight}",
                 f"{car.steering_wheel}°",
                 car.drive_train,
@@ -732,6 +732,74 @@ class Rsf:
         """
         self.features = features
         logger.info(f"Set features to: {features}")
+
+    def generate_ai_ffb_file(self, models: dict, output_file: str) -> None:
+        """Generate a new personal.ini file with AI-predicted FFB settings
+
+        Args:
+            models: Dictionary of trained models for each surface
+            output_file: Path to output file
+        """
+        if not models:
+            logger.error("No trained models available")
+            return
+
+        current_car_id = None
+        current_car = None
+        predictions = None
+
+        logger.info(f"Starting FFB file generation: reading from {self.personal_ini}")
+        logger.info(f"Writing predictions to {output_file}")
+
+        cars_processed = 0
+        cars_modified = 0
+
+        try:
+            with open(self.personal_ini, 'r', encoding='utf-8') as infile, \
+                 open(output_file, 'w', encoding='utf-8') as outfile:
+
+                for line in infile:
+                    # Remove BOM if present
+                    line = line.replace('\ufeff', '')
+
+                    # Check for car section header
+                    if line.strip().startswith('[car'):
+                        current_car_id = line.strip()[4:-1]  # Extract ID between [car and ]
+                        current_car = self.cars.get(current_car_id)
+                        cars_processed += 1
+
+                        if current_car and not self.has_custom_ffb(current_car):
+                            predictions = self.predict_ffb_settings(current_car, models)
+                            cars_modified += 1
+                            logger.debug(f"Set predicted FFB for car {current_car_id}: "
+                                       f"T:{predictions[0]} G:{predictions[1]} S:{predictions[2]}")
+                        else:
+                            if current_car:
+                                logger.debug(f"Skipping car {current_car_id} - already has custom FFB")
+                            else:
+                                logger.warning(f"Car {current_car_id} found in personal.ini but not in cars.json")
+                            predictions = None
+
+                    # Check for FFB settings if we have predictions
+                    if predictions and current_car:
+                        if line.strip().startswith('forcefeedbacksensitivitytarmac='):
+                            line = f'forcefeedbacksensitivitytarmac={predictions[0]}\n'
+                        elif line.strip().startswith('forcefeedbacksensitivitygravel='):
+                            line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
+                        elif line.strip().startswith('forcefeedbacksensitivitysnow='):
+                            line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
+                        elif line.strip() == '':  # At end of section
+                            line = 'ffb_predicted=true\n\n'
+
+                    outfile.write(line)
+
+            logger.info(f"FFB file generation complete:")
+            logger.info(f"- Total cars processed: {cars_processed}")
+            logger.info(f"- Cars modified with predictions: {cars_modified}")
+            logger.info(f"- Output written to: {output_file}")
+
+        except Exception as e:
+            raise Exception(f"Error generating AI FFB file: {str(e)}")
 
     def validate_predictions(self, models: dict) -> None:
         """Validate model predictions against known FFB settings"""
@@ -827,6 +895,7 @@ def main():
     parser.add_argument('--select-sample', type=int, nargs='?', const=3, default=None, metavar='N',
                        help='Select N cars from each cluster for training sample (default: 3)')
     parser.add_argument('--html', type=str, help='Save console output to HTML file')
+    parser.add_argument('--generate', action='store_true', help='Generate rallysimfans_personal_ai.ini with AI-predicted FFB settings')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
@@ -850,10 +919,14 @@ def main():
             selected = rsf.select_training_sample(args.select_sample)
             rsf.display_selected_sample(selected)
 
-        if args.train or args.validate:
+        if args.train or args.validate or args.generate:
             models = rsf.train_ffb_models()
-            if models and args.validate:
-                rsf.validate_predictions(models)
+            if models:
+                if args.validate:
+                    rsf.validate_predictions(models)
+                if args.generate:
+                    output_file = os.path.join(args.rsf_path, 'rallysimfans_personal_ai.ini')
+                    rsf.generate_ai_ffb_file(models, output_file)
 
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
