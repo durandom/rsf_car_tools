@@ -23,12 +23,18 @@ class Rsf:
 
         # Define required files
         self.personal_ini = os.path.join(rsf_path, 'rallysimfans_personal.ini')
+        self.rbr_ini = os.path.join(rsf_path, 'RichardBurnsRally.ini')
         self.cars_json = os.path.join(rsf_path, 'rsfdata', 'cache', 'cars.json')
         self.cars_data_json = os.path.join(rsf_path, 'rsfdata', 'cache', 'cars_data.json')
 
         self._validate_files()
         self.cars: Dict[str, Car] = {}
+        # Global FFB settings from RBR
+        self.ffb_tarmac = 0
+        self.ffb_gravel = 0
+        self.ffb_snow = 0
         self._load_personal_ini()
+        self._load_rbr_ini()
         self._load_cars_json()
         self._load_cars_data_json()
         self._log_cars_statistics()
@@ -37,7 +43,7 @@ class Rsf:
         """Validate all required files exist"""
         missing_files = []
 
-        for filepath in [self.personal_ini, self.cars_json, self.cars_data_json]:
+        for filepath in [self.personal_ini, self.rbr_ini, self.cars_json, self.cars_data_json]:
             if not os.path.exists(filepath):
                 missing_files.append(filepath)
 
@@ -91,7 +97,11 @@ class Rsf:
     def _log_cars_statistics(self) -> None:
         """Log statistics about loaded cars"""
         total_cars = len(self.cars)
-        logger.info(f"Loaded {total_cars} cars total")
+        ffb_cars = sum(1 for car in self.cars.values()
+                      if (car.ffb_tarmac != self.ffb_tarmac or 
+                          car.ffb_gravel != self.ffb_gravel or 
+                          car.ffb_snow != self.ffb_snow))
+        logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
 
     def _load_cars_data_json(self) -> None:
         """Load cars_data.json and add technical data to existing Car objects"""
@@ -128,6 +138,17 @@ class Rsf:
                 return
 
         logger.error("Failed to load cars_data.json with any supported encoding")
+
+    def _load_rbr_ini(self) -> None:
+        """Load global FFB settings from RichardBurnsRally.ini"""
+        config = self.config_parser(self.rbr_ini)
+
+        if 'NGP' in config:
+            ngp_section = config['NGP']
+            self.ffb_tarmac = int(ngp_section.get('ForceFeedbackSensitivityTarmac', 0))
+            self.ffb_gravel = int(ngp_section.get('ForceFeedbackSensitivityGravel', 0))
+            self.ffb_snow = int(ngp_section.get('ForceFeedbackSensitivitySnow', 0))
+            logger.debug(f"Loaded global FFB settings - Tarmac: {self.ffb_tarmac}, Gravel: {self.ffb_gravel}, Snow: {self.ffb_snow}")
 
     def _load_personal_ini(self) -> None:
         """Load car configurations from personal.ini"""
