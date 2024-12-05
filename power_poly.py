@@ -109,7 +109,7 @@ class Rsf:
         if not values:
             logger.error(f"No valid data found for {title}")
             return
-            
+
         plt.clear_figure()
         plt.hist(values, bins=20)
         plt.title(title)
@@ -128,7 +128,7 @@ class Rsf:
         counts = Counter(values)
         categories = list(counts.keys())
         frequencies = list(counts.values())
-            
+
         plt.clear_figure()
         plt.bar(categories, frequencies)
         plt.title(title)
@@ -154,9 +154,9 @@ class Rsf:
         self._plot_categorical_distribution(drivetrains, "Car Drivetrain Distribution", "Drivetrain Type")
 
     def plot_steering_stats(self):
-        """Plot distribution of steering wheel types"""
-        steering = [car.steering_wheel for car in self.cars.values() if car.steering_wheel]
-        self._plot_categorical_distribution(steering, "Steering Wheel Distribution", "Steering Type")
+        """Plot histogram of steering wheel angles"""
+        steering_angles = [car.steering_wheel for car in self.cars.values() if car.steering_wheel is not None]
+        self._plot_numeric_histogram(steering_angles, "Steering Wheel Angle Distribution", "Angle (degrees)")
 
     def _load_cars_data_json(self) -> None:
         """Load cars_data.json and add technical data to existing Car objects"""
@@ -178,7 +178,15 @@ class Rsf:
                             car.transmission = car_data.get('transmission', '')
                             car.weight = car_data.get('weight', '')
                             car.wdf = car_data.get('wdf', '')
-                            car.steering_wheel = car_data.get('steering_wheel', '')
+                            # Parse steering wheel angle to numeric value
+                            steering_wheel = car_data.get('steering_wheel', '')
+                            try:
+                                if steering_wheel:
+                                    car.steering_wheel = float(steering_wheel.replace('°', '').strip())
+                                else:
+                                    car.steering_wheel = 0
+                            except ValueError:
+                                car.steering_wheel = 0
                             car.skin = car_data.get('skin', '')
                             car.model = car_data.get('model', '')
                             car.year = car_data.get('year', '')
@@ -200,6 +208,10 @@ class Rsf:
 
         if 'NGP' in config:
             ngp_section = config['NGP']
+            # make sure ngp_section is a dictionary
+            if not isinstance(ngp_section, dict):
+                return
+
             self.ffb_tarmac = int(ngp_section.get('ForceFeedbackSensitivityTarmac', 0))
             self.ffb_gravel = int(ngp_section.get('ForceFeedbackSensitivityGravel', 0))
             self.ffb_snow = int(ngp_section.get('ForceFeedbackSensitivitySnow', 0))
@@ -257,7 +269,7 @@ class Car:
         self.transmission = ''
         self.weight = ''
         self.wdf = ''
-        self.steering_wheel = ''
+        self.steering_wheel = 0.0
         self.skin = ''
         self.model = ''
         self.year = ''
