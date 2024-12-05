@@ -17,7 +17,12 @@ def setup_logging(verbose: bool) -> None:
     """Configure logging level based on verbosity"""
     logger.remove()  # Remove default handler
     level = "DEBUG" if verbose else "INFO"
-    logger.add(sink=lambda msg: print(msg), level=level)
+    # Format with colors and ensure single line per entry
+    logger.add(
+        sink=lambda msg: print(msg, end=''),
+        level=level,
+        format="\033[32m{time:HH:mm:ss}\033[0m | \033[1m{level: <8}\033[0m | \033[36m{message}\033[0m"
+    )
 
 class Car:
     def __init__(self, id: str, data: Dict[str, str]):
@@ -219,7 +224,8 @@ class Rsf:
                     if weight > 0 and steering > 0 and drivetrain > 0:
                         features.append([weight, steering, drivetrain])
                         targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
-                except (ValueError, AttributeError):
+                except (ValueError, AttributeError) as e:
+                    logger.debug(f"Skipping car {car.id} due to invalid/missing data: {str(e)}")
                     continue
 
         return np.array(features), np.array(targets)
