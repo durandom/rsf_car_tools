@@ -1,27 +1,50 @@
 import os
 import json
 import argparse
+import sys
 import numpy as np
 from io import StringIO
 from configobj import ConfigObj
 from typing import List, Tuple, Dict, Optional, TYPE_CHECKING
 from loguru import logger
 import plotext as plt
+from rich.console import Console
+from rich.table import Table
 
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 
-def setup_logging(verbose: bool) -> None:
-    """Configure logging level based on verbosity"""
+def setup_logging(verbose_count: int) -> None:
+    """Configure logging level based on verbosity count
+
+    Args:
+        verbose_count: Number of times --verbose flag was specified
+            0 = INFO only
+            1 = Add WARNING
+            2 = Add DEBUG
+            3 = Add everything
+    """
     logger.remove()  # Remove default handler
-    level = "DEBUG" if verbose else "INFO"
+
+    # Map verbosity count to log level using all loguru severity levels
+    levels = {
+        0: "CRITICAL",  # 50 (show only critical)
+        1: "ERROR",     # 40 (show error and above)
+        2: "WARNING",   # 30 (show warning and above)
+        3: "SUCCESS",   # 25 (show success and above)
+        4: "INFO",      # 20 (show info and above)
+        5: "DEBUG",     # 10 (show debug and above)
+        6: "TRACE"      # 5  (show everything)
+    }
+    level = levels.get(min(verbose_count, max(levels.keys())), "CRITICAL")
     logger.add(
-        sink=lambda msg: print(msg, end=''),
+        sys.stdout,
         colorize=True,
         level=level
     )
+    logger.success(f"Set log level to {level} based on verbosity count {verbose_count}")
 
 class Car:
     def __init__(self, id: str, data: Dict[str, str]):
@@ -80,6 +103,7 @@ class Rsf:
 
         self._validate_files()
         self.cars: Dict[str, Car] = {}
+        self.undriven_cars: Dict[str, dict] = {}  # Track cars found in cars.json but not in personal.ini
         # Global FFB settings from RBR
         self.ffb_tarmac = 0
         self.ffb_gravel = 0
@@ -154,7 +178,6 @@ class Rsf:
                     car_id = car_json['id']
                     if car_id in self.cars:
                         car = self.cars[car_id]
-                        # Add json attributes to existing Car object
                         car.path = car_json.get('path', '')
                         car.hash = car_json.get('hash', '')
                         car.carmodel_id = car_json.get('carmodel_id', '')
@@ -166,6 +189,9 @@ class Rsf:
                         car.audio = car_json.get('audio')
                         car.audio_hash = car_json.get('audio_hash', '')
                         logger.debug(f"Added JSON data to car {car_id}")
+                    else:
+                        logger.debug(f"Car {car_id} found in cars.json but not in personal.ini")
+                        self.undriven_cars[car_id] = car_json
         except Exception as e:
             logger.error(f"Error loading cars.json: {str(e)}")
 
@@ -187,10 +213,25 @@ class Rsf:
                 car.ffb_snow != self.ffb_snow)
 
     def _log_cars_statistics(self) -> None:
-        """Log statistics about loaded cars"""
+        """Display statistics about loaded cars"""
+        console = Console()
+        
+        # Create statistics table
+        table = Table(title="Car Statistics", show_header=True)
+        table.add_column("Metric", style="cyan")
+        table.add_column("Count", justify="right", style="green")
+        
         total_cars = len(self.cars)
         ffb_cars = sum(1 for car in self.cars.values() if self.has_custom_ffb(car))
-        logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
+        undriven_cars = len(self.undriven_cars)
+        
+        table.add_row("Total Cars", str(total_cars))
+        table.add_row("Cars with Custom FFB", str(ffb_cars))
+        table.add_row("Undriven Cars", str(undriven_cars))
+        
+        console.print("\n")
+        console.print(table)
+        console.print("\n")
 
     def prepare_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
         """Prepare feature and target arrays for FFB prediction model training.
@@ -224,7 +265,7 @@ class Rsf:
                         features.append([weight, steering, drivetrain])
                         targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
                 except (ValueError, AttributeError) as e:
-                    logger.debug(f"Skipping car {car.id} due to invalid/missing data: {str(e)}")
+                    logger.warning(f"Skipping car {car.id} due to invalid/missing data: {str(e)}")
                     continue
 
         return np.array(features), np.array(targets)
@@ -243,7 +284,7 @@ class Rsf:
         # Create pipeline with scaling, polynomial features, and regression
         model = Pipeline([
             ('scaler', StandardScaler()),
-            ('poly', PolynomialFeatures(degree=1)),  # Linear features only
+            ('poly', PolynomialFeatures(degree=3)),  # Linear features only
             ('regressor', LinearRegression(fit_intercept=True))
         ])
 
@@ -473,7 +514,7 @@ class Rsf:
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power polygon settings')
     parser.add_argument('rsf_path', help='Path to RSF installation directory')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Enable debug logging')
+    parser.add_argument('--verbose', '-v', action='count', default=0, help='Increase verbosity level (can be used multiple times)')
     parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')
     parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
     parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
