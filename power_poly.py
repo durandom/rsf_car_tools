@@ -17,11 +17,10 @@ def setup_logging(verbose: bool) -> None:
     """Configure logging level based on verbosity"""
     logger.remove()  # Remove default handler
     level = "DEBUG" if verbose else "INFO"
-    # Format with colors and ensure single line per entry
     logger.add(
         sink=lambda msg: print(msg, end=''),
-        level=level,
-        format="\033[32m{time:HH:mm:ss}\033[0m | \033[1m{level: <8}\033[0m | \033[36m{message}\033[0m"
+        colorize=True,
+        level=level
     )
 
 class Car:
