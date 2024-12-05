@@ -762,25 +762,32 @@ class Rsf:
                     # Remove BOM if present
                     line = line.replace('\ufeff', '')
 
-                    # Check for car section header
-                    if line.strip().startswith('[car'):
-                        current_car_id = line.strip()[4:-1]  # Extract ID between [car and ]
-                        current_car = self.cars.get(current_car_id)
-                        cars_processed += 1
-
-                        if current_car and not self.has_custom_ffb(current_car):
-                            predictions = self.predict_ffb_settings(current_car, models)
-                            cars_modified += 1
-                            logger.debug(f"Set predicted FFB for car {current_car_id}: "
-                                       f"T:{predictions[0]} G:{predictions[1]} S:{predictions[2]}")
-                        else:
-                            if current_car:
-                                logger.debug(f"Skipping car {current_car_id} - already has custom FFB")
-                            else:
-                                logger.warning(f"Car {current_car_id} found in personal.ini but not in cars.json")
+                    # Check for any section header
+                    if line.strip().startswith('['):
+                        # Reset car tracking for non-car sections
+                        if not line.strip().startswith('[car'):
+                            current_car_id = None
+                            current_car = None
                             predictions = None
+                        else:
+                            # Handle car section
+                            current_car_id = line.strip()[4:-1]  # Extract ID between [car and ]
+                            current_car = self.cars.get(current_car_id)
+                            cars_processed += 1
 
-                    # Check for FFB settings if we have predictions
+                            if current_car and not self.has_custom_ffb(current_car):
+                                predictions = self.predict_ffb_settings(current_car, models)
+                                cars_modified += 1
+                                logger.debug(f"Set predicted FFB for car {current_car_id}: "
+                                           f"T:{predictions[0]} G:{predictions[1]} S:{predictions[2]}")
+                            else:
+                                if current_car:
+                                    logger.debug(f"Skipping car {current_car_id} - already has custom FFB")
+                                else:
+                                    logger.warning(f"Car {current_car_id} found in personal.ini but not in cars.json")
+                                predictions = None
+
+                    # Check for FFB settings if we have predictions for a car section
                     if predictions and current_car:
                         if line.strip().startswith('forcefeedbacksensitivitytarmac='):
                             line = f'forcefeedbacksensitivitytarmac={predictions[0]}\n'
@@ -788,7 +795,8 @@ class Rsf:
                             line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
                         elif line.strip().startswith('forcefeedbacksensitivitysnow='):
                             line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
-                        elif line.strip() == '':  # At end of section
+                        # Only add ffb_predicted in car sections
+                        elif line.strip() == '' and current_car_id:  # At end of car section
                             line = 'ffb_predicted=true\n\n'
 
                     outfile.write(line)
