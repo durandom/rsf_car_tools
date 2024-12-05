@@ -7,6 +7,8 @@ name = "pypi"
 configobj = "*"
 loguru = "*"
 plotext = "*"
+numpy = "*"
+scikit-learn = "*"
 
 [dev-packages]
 

@@ -1,11 +1,17 @@
 import os
 import json
 import argparse
+import numpy as np
 from io import StringIO
 from configobj import ConfigObj
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, TYPE_CHECKING
 from loguru import logger
 import plotext as plt
+
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
 
 def setup_logging(verbose: bool) -> None:
     """Configure logging level based on verbosity"""
@@ -13,6 +19,45 @@ def setup_logging(verbose: bool) -> None:
     level = "DEBUG" if verbose else "INFO"
     logger.add(sink=lambda msg: print(msg), level=level)
 
+class Car:
+    def __init__(self, id: str, data: Dict[str, str]):
+        """Initialize car configuration
+
+        Args:
+            id (str): Car ID number
+            data (Dict[str, str]): Car configuration data from personal.ini
+        """
+        self.id = id
+        self.name = data.get('name', '')
+        self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0))
+        self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0))
+        self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0))
+
+        # These will be populated from cars.json later
+        self.path = ''
+        self.hash = ''
+        self.carmodel_id = ''
+        self.user_id = ''
+        self.base_group_id = ''
+        self.ngp = ''
+        self.custom_setups = ''
+        self.rev = ''
+        self.audio = None
+        self.audio_hash = ''
+
+        # Car data attributes
+        self.power = ''
+        self.torque = ''
+        self.drive_train = ''
+        self.engine = ''
+        self.transmission = ''
+        self.weight = ''
+        self.wdf = ''
+        self.steering_wheel = 0.0
+        self.skin = ''
+        self.model = ''
+        self.year = ''
+        self.shifter_type = ''
 class Rsf:
     def __init__(self, rsf_path: str):
         """Initialize RSF configuration handler
@@ -104,6 +149,127 @@ class Rsf:
                           car.ffb_snow != self.ffb_snow))
         logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
 
+    def prepare_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Extract features and targets from cars with custom FFB settings"""
+        features = []
+        targets = []
+
+        for car in self.cars.values():
+            # Only use cars with custom FFB settings
+            if (car.ffb_tarmac != self.ffb_tarmac or
+                car.ffb_gravel != self.ffb_gravel or
+                car.ffb_snow != self.ffb_snow):
+
+                # Extract and normalize features
+                try:
+                    weight = float(car.weight.lower().replace('kg', '').strip())
+                    steering = float(car.steering_wheel)
+                    # Encode drivetrain (RWD=1, FWD=2, AWD=3)
+                    drive_map = {'RWD': 1, 'FWD': 2, 'AWD': 3}
+                    drivetrain = drive_map.get(car.drive_train.upper(), 0)
+
+                    if weight > 0 and steering > 0 and drivetrain > 0:
+                        features.append([weight, steering, drivetrain])
+                        targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
+                except (ValueError, AttributeError):
+                    continue
+
+        return np.array(features), np.array(targets)
+
+    def create_ffb_model(self):
+        """Create and train polynomial regression model"""
+        # Create pipeline with scaling, polynomial features, and regression
+        model = Pipeline([
+            ('scaler', StandardScaler()),
+            ('poly', PolynomialFeatures(degree=2)),
+            ('regressor', LinearRegression())
+        ])
+
+        return model
+
+    def train_ffb_models(self):
+        """Train separate models for each surface type"""
+        X, y = self.prepare_training_data()
+        if len(X) == 0:
+            logger.error("No valid training data found")
+            return None
+
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+        # Train separate model for each surface
+        models = {}
+        surface_names = ['tarmac', 'gravel', 'snow']
+
+        for i, surface in enumerate(surface_names):
+            model = self.create_ffb_model()
+            model.fit(X_train, y_train[:, i])
+            score = model.score(X_test, y_test[:, i])
+            logger.info(f"{surface.title()} model R² score: {score:.3f}")
+            models[surface] = model
+
+        return models
+
+    def predict_ffb_settings(self, car: Car, models: dict) -> Tuple[int, int, int]:
+        """Predict FFB settings for a car using trained models"""
+        try:
+            # Extract features
+            weight = float(car.weight.lower().replace('kg', '').strip())
+            steering = float(car.steering_wheel)
+            drive_map = {'RWD': 1, 'FWD': 2, 'AWD': 3}
+            drivetrain = drive_map.get(car.drive_train.upper(), 0)
+
+            if weight <= 0 or steering <= 0 or drivetrain <= 0:
+                return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
+
+            features = np.array([[weight, steering, drivetrain]])
+
+            # Predict for each surface
+            ffb_tarmac = int(round(models['tarmac'].predict(features)[0]))
+            ffb_gravel = int(round(models['gravel'].predict(features)[0]))
+            ffb_snow = int(round(models['snow'].predict(features)[0]))
+
+            # Clamp values to valid range (0-200)
+            ffb_tarmac = max(0, min(200, ffb_tarmac))
+            ffb_gravel = max(0, min(200, ffb_gravel))
+            ffb_snow = max(0, min(200, ffb_snow))
+
+            return (ffb_tarmac, ffb_gravel, ffb_snow)
+
+        except (ValueError, AttributeError) as e:
+            logger.warning(f"Could not predict FFB settings for car {car.id}: {str(e)}")
+            return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
+
+    def validate_predictions(self, models: dict) -> None:
+        """Validate model predictions against known FFB settings"""
+        correct = 0
+        total = 0
+
+        for car in self.cars.values():
+            if (car.ffb_tarmac != self.ffb_tarmac or
+                car.ffb_gravel != self.ffb_gravel or
+                car.ffb_snow != self.ffb_snow):
+
+                pred_tarmac, pred_gravel, pred_snow = self.predict_ffb_settings(car, models)
+
+                # Check if predictions are within 10% of actual values
+                tarmac_ok = abs(pred_tarmac - car.ffb_tarmac) <= (car.ffb_tarmac * 0.1)
+                gravel_ok = abs(pred_gravel - car.ffb_gravel) <= (car.ffb_gravel * 0.1)
+                snow_ok = abs(pred_snow - car.ffb_snow) <= (car.ffb_snow * 0.1)
+
+                if tarmac_ok and gravel_ok and snow_ok:
+                    correct += 1
+                total += 1
+
+                logger.debug(f"Car {car.id} predictions: "
+                           f"T:{pred_tarmac}({car.ffb_tarmac}) "
+                           f"G:{pred_gravel}({car.ffb_gravel}) "
+                           f"S:{pred_snow}({car.ffb_snow})")
+
+        if total > 0:
+            accuracy = (correct / total) * 100
+            logger.info(f"Prediction accuracy within 10%: {accuracy:.1f}% ({correct}/{total} cars)")
+
     def _plot_numeric_histogram(self, values, title, xlabel):
         """Plot histogram for numeric data"""
         if not values:
@@ -111,7 +277,7 @@ class Rsf:
             return
 
         plt.clear_figure()
-        plt.hist(values, bins=20)
+        plt.hist(values, bins=10)
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel("Number of Cars")
@@ -235,51 +401,15 @@ class Rsf:
             logger.debug(f"Loaded car configuration: {car_id} - {car_data}")
             self.cars[car_id] = Car(car_id, car_data)
 
-class Car:
-    def __init__(self, id: str, data: Dict[str, str]):
-        """Initialize car configuration
 
-        Args:
-            id (str): Car ID number
-            data (Dict[str, str]): Car configuration data from personal.ini
-        """
-        self.id = id
-        self.name = data.get('name', '')
-        self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0))
-        self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0))
-        self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0))
-
-        # These will be populated from cars.json later
-        self.path = ''
-        self.hash = ''
-        self.carmodel_id = ''
-        self.user_id = ''
-        self.base_group_id = ''
-        self.ngp = ''
-        self.custom_setups = ''
-        self.rev = ''
-        self.audio = None
-        self.audio_hash = ''
-
-        # Car data attributes
-        self.power = ''
-        self.torque = ''
-        self.drive_train = ''
-        self.engine = ''
-        self.transmission = ''
-        self.weight = ''
-        self.wdf = ''
-        self.steering_wheel = 0.0
-        self.skin = ''
-        self.model = ''
-        self.year = ''
-        self.shifter_type = ''
 
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power polygon settings')
     parser.add_argument('rsf_path', help='Path to RSF installation directory')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable debug logging')
     parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')
+    parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
+    parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
@@ -295,6 +425,12 @@ def main():
                 rsf.plot_drivetrain_stats()
             if 'steering' in stats_list:
                 rsf.plot_steering_stats()
+
+        if args.train or args.validate:
+            models = rsf.train_ffb_models()
+            if models and args.validate:
+                rsf.validate_predictions(models)
+
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
         return 1
