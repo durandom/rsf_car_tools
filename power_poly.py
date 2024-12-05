@@ -103,7 +103,7 @@ class Rsf:
 
         self._validate_files()
         self.cars: Dict[str, Car] = {}
-        self.undriven_cars: Dict[str, dict] = {}  # Track cars found in cars.json but not in personal.ini
+        self.undriven_cars: Dict[str, Car] = {}  # Track cars found in cars.json but not in personal.ini
         # Global FFB settings from RBR
         self.ffb_tarmac = 0
         self.ffb_gravel = 0
@@ -169,6 +169,88 @@ class Rsf:
             logger.error(f"Error parsing {file}: {str(e)}")
             exit(1)
 
+    def _load_cars_data_json(self) -> None:
+        """Load cars_data.json and add technical data to existing Car objects"""
+        encodings = ['utf-8', 'latin1', 'cp1252']
+
+        for encoding in encodings:
+            try:
+                with open(self.cars_data_json, 'r', encoding=encoding) as f:
+                    cars_data_json = json.load(f)
+                    for car_data in cars_data_json:
+                        car_id = car_data['car_id']
+                        if car_id in self.cars:
+                            car = self.cars[car_id]
+                            # Add technical data attributes to existing Car object
+                        elif car_id in self.undriven_cars:
+                            car = self.undriven_cars[car_id]
+                        else:
+                            logger.error(f"Car {car_id} found in cars_data.json but not in personal.ini")
+                            continue
+                        car.power = car_data.get('power', '')
+                        car.torque = car_data.get('torque', '')
+                        car.drive_train = car_data.get('drive_train', '')
+                        car.engine = car_data.get('engine', '')
+                        car.transmission = car_data.get('transmission', '')
+                        car.weight = car_data.get('weight', '')
+                        car.wdf = car_data.get('wdf', '')
+                        # Parse steering wheel angle to numeric value
+                        steering_wheel = car_data.get('steering_wheel', '')
+                        try:
+                            if steering_wheel:
+                                car.steering_wheel = float(steering_wheel.replace('°', '').strip())
+                            else:
+                                car.steering_wheel = 0
+                        except ValueError:
+                            car.steering_wheel = 0
+                        car.skin = car_data.get('skin', '')
+                        car.model = car_data.get('model', '')
+                        car.year = car_data.get('year', '')
+                        car.shifter_type = car_data.get('shifterType', '')
+                        logger.debug(f"Added technical data to car {car_id}")
+                    logger.debug(f"Successfully loaded cars_data.json with {encoding} encoding")
+                    return
+            except UnicodeDecodeError:
+                continue
+            except Exception as e:
+                logger.error(f"Error loading cars_data.json: {str(e)}")
+                return
+
+        logger.error("Failed to load cars_data.json with any supported encoding")
+
+    def _load_rbr_ini(self) -> None:
+        """Load global FFB settings from RichardBurnsRally.ini"""
+        config = self.config_parser(self.rbr_ini)
+
+        if 'NGP' in config:
+            ngp_section = config['NGP']
+            # make sure ngp_section is a dictionary
+            if not isinstance(ngp_section, dict):
+                return
+
+            self.ffb_tarmac = int(ngp_section.get('ForceFeedbackSensitivityTarmac', 0))
+            self.ffb_gravel = int(ngp_section.get('ForceFeedbackSensitivityGravel', 0))
+            self.ffb_snow = int(ngp_section.get('ForceFeedbackSensitivitySnow', 0))
+            logger.debug(f"Loaded global FFB settings - Tarmac: {self.ffb_tarmac}, Gravel: {self.ffb_gravel}, Snow: {self.ffb_snow}")
+
+    def _load_personal_ini(self) -> None:
+        """Load car configurations from personal.ini"""
+        config = self.config_parser(self.personal_ini)
+
+        for section_name in config:
+            if not section_name.startswith('car'):
+                continue
+
+            car_id = section_name[3:]  # Remove 'car' prefix
+            # Get section data and ensure string types
+            section = config[section_name]
+            # make sure section is a dictionary
+            if not isinstance(section, dict):
+                continue
+            car_data = {str(k): str(v) for k, v in section.items()}
+            logger.debug(f"Loaded car configuration: {car_id} - {car_data}")
+            self.cars[car_id] = Car(car_id, car_data)
+
     def _load_cars_json(self) -> None:
         """Load cars.json and add data to existing Car objects"""
         try:
@@ -178,20 +260,24 @@ class Rsf:
                     car_id = car_json['id']
                     if car_id in self.cars:
                         car = self.cars[car_id]
-                        car.path = car_json.get('path', '')
-                        car.hash = car_json.get('hash', '')
-                        car.carmodel_id = car_json.get('carmodel_id', '')
-                        car.user_id = car_json.get('user_id', '')
-                        car.base_group_id = car_json.get('base_group_id', '')
-                        car.ngp = car_json.get('ngp', '')
-                        car.custom_setups = car_json.get('custom_setups', '')
-                        car.rev = car_json.get('rev', '')
-                        car.audio = car_json.get('audio')
-                        car.audio_hash = car_json.get('audio_hash', '')
                         logger.debug(f"Added JSON data to car {car_id}")
                     else:
                         logger.debug(f"Car {car_id} found in cars.json but not in personal.ini")
-                        self.undriven_cars[car_id] = car_json
+                        # Create a Car object for undriven cars too
+                        car = Car(car_id, {})  # Empty config since not in personal.ini
+                        self.undriven_cars[car_id] = car
+
+                    car.name = car_json.get('name', '')
+                    car.path = car_json.get('path', '')
+                    car.hash = car_json.get('hash', '')
+                    car.carmodel_id = car_json.get('carmodel_id', '')
+                    car.user_id = car_json.get('user_id', '')
+                    car.base_group_id = car_json.get('base_group_id', '')
+                    car.ngp = car_json.get('ngp', '')
+                    car.custom_setups = car_json.get('custom_setups', '')
+                    car.rev = car_json.get('rev', '')
+                    car.audio = car_json.get('audio')
+                    car.audio_hash = car_json.get('audio_hash', '')
         except Exception as e:
             logger.error(f"Error loading cars.json: {str(e)}")
 
@@ -212,23 +298,57 @@ class Rsf:
                 car.ffb_gravel != self.ffb_gravel or
                 car.ffb_snow != self.ffb_snow)
 
+    def format_car_details(self, car: Car) -> str:
+        """Format car details for display
+
+        Args:
+            car_data: Dictionary containing car data
+
+        Returns:
+            Formatted string with key car details
+        """
+        car_id = car.id
+        model = car.model
+        year = car.year
+        drive_train = car.drive_train
+
+        return f"[ID: {car_id}] {model} {year} - {drive_train}"
+
+    def list_undriven_cars(self) -> None:
+        """Display list of undriven cars with key details"""
+        console = Console()
+
+        table = Table(title="Undriven Cars", show_header=True)
+        table.add_column("Car Name", style="cyan")
+        table.add_column("Details", style="green")
+
+        for car_id, car in sorted(self.undriven_cars.items(), key=lambda x: x[1].name):
+            table.add_row(
+                car.name,
+                self.format_car_details(car)
+            )
+
+        console.print("\n")
+        console.print(table)
+        console.print("\n")
+
     def _log_cars_statistics(self) -> None:
         """Display statistics about loaded cars"""
         console = Console()
-        
+
         # Create statistics table
         table = Table(title="Car Statistics", show_header=True)
         table.add_column("Metric", style="cyan")
         table.add_column("Count", justify="right", style="green")
-        
+
         total_cars = len(self.cars)
         ffb_cars = sum(1 for car in self.cars.values() if self.has_custom_ffb(car))
         undriven_cars = len(self.undriven_cars)
-        
+
         table.add_row("Total Cars", str(total_cars))
         table.add_row("Cars with Custom FFB", str(ffb_cars))
         table.add_row("Undriven Cars", str(undriven_cars))
-        
+
         console.print("\n")
         console.print(table)
         console.print("\n")
@@ -432,83 +552,6 @@ class Rsf:
         steering_angles = [car.steering_wheel for car in self.cars.values() if car.steering_wheel is not None]
         self._plot_numeric_histogram(steering_angles, "Steering Wheel Angle Distribution", "Angle (degrees)")
 
-    def _load_cars_data_json(self) -> None:
-        """Load cars_data.json and add technical data to existing Car objects"""
-        encodings = ['utf-8', 'latin1', 'cp1252']
-
-        for encoding in encodings:
-            try:
-                with open(self.cars_data_json, 'r', encoding=encoding) as f:
-                    cars_data_json = json.load(f)
-                    for car_data in cars_data_json:
-                        car_id = car_data['car_id']
-                        if car_id in self.cars:
-                            car = self.cars[car_id]
-                            # Add technical data attributes to existing Car object
-                            car.power = car_data.get('power', '')
-                            car.torque = car_data.get('torque', '')
-                            car.drive_train = car_data.get('drive_train', '')
-                            car.engine = car_data.get('engine', '')
-                            car.transmission = car_data.get('transmission', '')
-                            car.weight = car_data.get('weight', '')
-                            car.wdf = car_data.get('wdf', '')
-                            # Parse steering wheel angle to numeric value
-                            steering_wheel = car_data.get('steering_wheel', '')
-                            try:
-                                if steering_wheel:
-                                    car.steering_wheel = float(steering_wheel.replace('°', '').strip())
-                                else:
-                                    car.steering_wheel = 0
-                            except ValueError:
-                                car.steering_wheel = 0
-                            car.skin = car_data.get('skin', '')
-                            car.model = car_data.get('model', '')
-                            car.year = car_data.get('year', '')
-                            car.shifter_type = car_data.get('shifterType', '')
-                            logger.debug(f"Added technical data to car {car_id}")
-                    logger.debug(f"Successfully loaded cars_data.json with {encoding} encoding")
-                    return
-            except UnicodeDecodeError:
-                continue
-            except Exception as e:
-                logger.error(f"Error loading cars_data.json: {str(e)}")
-                return
-
-        logger.error("Failed to load cars_data.json with any supported encoding")
-
-    def _load_rbr_ini(self) -> None:
-        """Load global FFB settings from RichardBurnsRally.ini"""
-        config = self.config_parser(self.rbr_ini)
-
-        if 'NGP' in config:
-            ngp_section = config['NGP']
-            # make sure ngp_section is a dictionary
-            if not isinstance(ngp_section, dict):
-                return
-
-            self.ffb_tarmac = int(ngp_section.get('ForceFeedbackSensitivityTarmac', 0))
-            self.ffb_gravel = int(ngp_section.get('ForceFeedbackSensitivityGravel', 0))
-            self.ffb_snow = int(ngp_section.get('ForceFeedbackSensitivitySnow', 0))
-            logger.debug(f"Loaded global FFB settings - Tarmac: {self.ffb_tarmac}, Gravel: {self.ffb_gravel}, Snow: {self.ffb_snow}")
-
-    def _load_personal_ini(self) -> None:
-        """Load car configurations from personal.ini"""
-        config = self.config_parser(self.personal_ini)
-
-        for section_name in config:
-            if not section_name.startswith('car'):
-                continue
-
-            car_id = section_name[3:]  # Remove 'car' prefix
-            # Get section data and ensure string types
-            section = config[section_name]
-            # make sure section is a dictionary
-            if not isinstance(section, dict):
-                continue
-            car_data = {str(k): str(v) for k, v in section.items()}
-            logger.debug(f"Loaded car configuration: {car_id} - {car_data}")
-            self.cars[car_id] = Car(car_id, car_data)
-
 
 
 def main():
@@ -518,6 +561,7 @@ def main():
     parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')
     parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
     parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
+    parser.add_argument('--undriven', action='store_true', help='List undriven cars')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
@@ -533,6 +577,9 @@ def main():
                 rsf.plot_drivetrain_stats()
             if 'steering' in stats_list:
                 rsf.plot_steering_stats()
+
+        if args.undriven:
+            rsf.list_undriven_cars()
 
         if args.train or args.validate:
             models = rsf.train_ffb_models()
