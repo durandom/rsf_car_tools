@@ -31,6 +31,7 @@ class Rsf:
         self._load_personal_ini()
         self._load_cars_json()
         self._load_cars_data_json()
+        self._log_cars_statistics()
 
     def _validate_files(self) -> None:
         """Validate all required files exist"""
@@ -86,6 +87,11 @@ class Rsf:
                         logger.debug(f"Added JSON data to car {car_id}")
         except Exception as e:
             logger.error(f"Error loading cars.json: {str(e)}")
+
+    def _log_cars_statistics(self) -> None:
+        """Log statistics about loaded cars"""
+        total_cars = len(self.cars)
+        logger.info(f"Loaded {total_cars} cars total")
 
     def _load_cars_data_json(self) -> None:
         """Load cars_data.json and add technical data to existing Car objects"""
