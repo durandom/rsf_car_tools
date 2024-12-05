@@ -11,10 +11,11 @@ import plotext as plt
 from rich.console import Console
 from rich.table import Table
 
-from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler, MinMaxScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
+from sklearn.cluster import KMeans
 
 def setup_logging(verbose_count: int) -> None:
     """Configure logging level based on verbosity count
@@ -73,14 +74,14 @@ class Car:
         self.audio_hash = ''
 
         # Car data attributes
-        self.power = ''
-        self.torque = ''
+        self.power = 0
+        self.torque = 0
         self.drive_train = ''
         self.engine = ''
         self.transmission = ''
-        self.weight = ''
+        self.weight = 0
         self.wdf = ''
-        self.steering_wheel = 0.0
+        self.steering_wheel = 0
         self.skin = ''
         self.model = ''
         self.year = ''
@@ -187,20 +188,34 @@ class Rsf:
                         else:
                             logger.error(f"Car {car_id} found in cars_data.json but not in personal.ini")
                             continue
-                        car.power = car_data.get('power', '')
-                        car.torque = car_data.get('torque', '')
+                        # Convert numeric values at load time
+                        try:
+                            power = car_data.get('power', '0')
+                            car.power = int(power) if power else 0
+                        except ValueError:
+                            car.power = 0
+
+                        try:
+                            torque = car_data.get('torque', '0')
+                            car.torque = int(torque) if torque else 0
+                        except ValueError:
+                            car.torque = 0
+
                         car.drive_train = car_data.get('drive_train', '')
                         car.engine = car_data.get('engine', '')
                         car.transmission = car_data.get('transmission', '')
-                        car.weight = car_data.get('weight', '')
-                        car.wdf = car_data.get('wdf', '')
-                        # Parse steering wheel angle to numeric value
-                        steering_wheel = car_data.get('steering_wheel', '')
+
                         try:
-                            if steering_wheel:
-                                car.steering_wheel = float(steering_wheel.replace('°', '').strip())
-                            else:
-                                car.steering_wheel = 0
+                            weight = car_data.get('weight', '0')
+                            car.weight = int(weight.lower().replace('kg', '').strip()) if weight else 0
+                        except ValueError:
+                            car.weight = 0
+
+                        car.wdf = car_data.get('wdf', '')
+
+                        try:
+                            steering = car_data.get('steering_wheel', '0')
+                            car.steering_wheel = int(steering.replace('°', '').strip()) if steering else 0
                         except ValueError:
                             car.steering_wheel = 0
                         car.skin = car_data.get('skin', '')
@@ -376,13 +391,13 @@ class Rsf:
 
                 # Extract and normalize features
                 try:
-                    weight = float(car.weight.lower().replace('kg', '').strip())
-                    steering = float(car.steering_wheel)
+                    weight = car.weight
+                    steering = car.steering_wheel
                     # Use pre-built drivetrain mapping
                     drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
 
                     if weight > 0 and steering > 0 and drivetrain > 0:
-                        features.append([weight, steering, drivetrain])
+                        features.append([car.weight, car.steering_wheel, drivetrain])
                         targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
                 except (ValueError, AttributeError) as e:
                     logger.warning(f"Skipping car {car.id} due to invalid/missing data: {str(e)}")
@@ -445,8 +460,8 @@ class Rsf:
         """Predict FFB settings for a car using trained models"""
         try:
             # Extract features
-            weight = float(car.weight.lower().replace('kg', '').strip())
-            steering = float(car.steering_wheel)
+            weight = car.weight
+            steering = car.steering_wheel
             drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
 
             if weight <= 0 or steering <= 0 or drivetrain <= 0:
@@ -469,6 +484,98 @@ class Rsf:
         except (ValueError, AttributeError) as e:
             logger.warning(f"Could not predict FFB settings for car {car.id}: {str(e)}")
             return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
+
+    def select_training_sample(self, sample_size: int = 20) -> List[Car]:
+        """Select a representative sample of cars using clustering.
+
+        Args:
+            sample_size: Target number of cars to select
+
+        Returns:
+            List of selected Car objects
+        """
+        # Prepare feature matrix for clustering
+        features = []
+        valid_cars = []
+
+        for car in self.cars.values():
+            try:
+                # Use pre-converted numeric values
+                drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
+
+                if car.weight > 0 and car.steering_wheel > 0 and drivetrain > 0:
+                    features.append([car.weight, car.steering_wheel, drivetrain])
+                    valid_cars.append(car)
+            except (ValueError, AttributeError):
+                continue
+
+        if not features:
+            logger.error("No valid cars found for clustering")
+            return []
+
+        # Normalize features to 0-1 range
+        features = np.array(features)
+        scaler = MinMaxScaler()
+        features_scaled = scaler.fit_transform(features)
+
+        # Determine number of clusters (roughly sample_size/2)
+        n_clusters = max(3, sample_size // 2)
+
+        # Perform clustering
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        clusters = kmeans.fit_predict(features_scaled)
+
+        # Select cars from each cluster
+        selected_cars = []
+        for cluster_id in range(n_clusters):
+            # Get indices of cars in this cluster
+            cluster_indices = np.where(clusters == cluster_id)[0]
+
+            # Select cars from cluster (more from larger clusters)
+            cluster_size = len(cluster_indices)
+            n_select = max(1, int(cluster_size * sample_size / len(features)))
+
+            # Randomly select cars from cluster
+            selected_indices = np.random.choice(
+                cluster_indices,
+                size=min(n_select, cluster_size),
+                replace=False
+            )
+
+            for idx in selected_indices:
+                selected_cars.append(valid_cars[idx])
+
+        logger.info(f"Selected {len(selected_cars)} cars from {n_clusters} clusters")
+
+        return selected_cars
+
+    def display_selected_sample(self, selected_cars: List[Car]) -> None:
+        """Display details of selected car sample
+
+        Args:
+            selected_cars: List of selected Car objects
+        """
+        console = Console()
+
+        table = Table(title="Selected Training Sample", show_header=True)
+        table.add_column("Car", style="cyan")
+        table.add_column("Weight", justify="right")
+        table.add_column("Steering", justify="right")
+        table.add_column("Drivetrain")
+        table.add_column("FFB (T/G/S)", justify="right")
+
+        for car in selected_cars:
+            table.add_row(
+                car.model,
+                f"{car.weight}",
+                f"{car.steering_wheel}°",
+                car.drive_train,
+                f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+            )
+
+        console.print("\n")
+        console.print(table)
+        console.print("\n")
 
     def validate_predictions(self, models: dict) -> None:
         """Validate model predictions against known FFB settings"""
@@ -536,8 +643,7 @@ class Rsf:
         for car in self.cars.values():
             try:
                 if car.weight:
-                    weight = float(car.weight.lower().replace('kg', '').strip())
-                    weights.append(weight)
+                    weights.append(car.weight)
             except ValueError:
                 continue
         self._plot_numeric_histogram(weights, "Car Weight Distribution", "Weight (kg)")
@@ -562,6 +668,8 @@ def main():
     parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
     parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
     parser.add_argument('--undriven', action='store_true', help='List undriven cars')
+    parser.add_argument('--select-sample', type=int, metavar='N',
+                       help='Select N cars as a training sample')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
@@ -580,6 +688,10 @@ def main():
 
         if args.undriven:
             rsf.list_undriven_cars()
+
+        if args.select_sample:
+            selected = rsf.select_training_sample(args.select_sample)
+            rsf.display_selected_sample(selected)
 
         if args.train or args.validate:
             models = rsf.train_ffb_models()
