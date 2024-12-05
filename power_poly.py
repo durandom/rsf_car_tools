@@ -104,29 +104,59 @@ class Rsf:
                           car.ffb_snow != self.ffb_snow))
         logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
 
+    def _plot_numeric_histogram(self, values, title, xlabel):
+        """Plot histogram for numeric data"""
+        if not values:
+            logger.error(f"No valid data found for {title}")
+            return
+            
+        plt.clear_figure()
+        plt.hist(values, bins=20)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel("Number of Cars")
+        plt.show()
+
+    def _plot_categorical_distribution(self, values, title, xlabel):
+        """Plot bar chart for categorical data"""
+        if not values:
+            logger.error(f"No valid data found for {title}")
+            return
+
+        # Count occurrences of each category
+        from collections import Counter
+        counts = Counter(values)
+        categories = list(counts.keys())
+        frequencies = list(counts.values())
+            
+        plt.clear_figure()
+        plt.bar(categories, frequencies)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel("Number of Cars")
+        plt.show()
+
     def plot_weight_stats(self):
         """Plot histogram of car weights"""
-        # Extract weights, converting to float and filtering out empty/invalid
         weights = []
         for car in self.cars.values():
             try:
                 if car.weight:
-                    # Remove 'kg' suffix if present and convert to float
                     weight = float(car.weight.lower().replace('kg', '').strip())
                     weights.append(weight)
             except ValueError:
                 continue
+        self._plot_numeric_histogram(weights, "Car Weight Distribution", "Weight (kg)")
 
-        if not weights:
-            logger.error("No valid weight data found")
-            return
+    def plot_drivetrain_stats(self):
+        """Plot distribution of car drivetrains"""
+        drivetrains = [car.drive_train for car in self.cars.values() if car.drive_train]
+        self._plot_categorical_distribution(drivetrains, "Car Drivetrain Distribution", "Drivetrain Type")
 
-        plt.clear_figure()
-        plt.hist(weights, bins=20)
-        plt.title("Car Weight Distribution")
-        plt.xlabel("Weight (kg)")
-        plt.ylabel("Number of Cars")
-        plt.show()
+    def plot_steering_stats(self):
+        """Plot distribution of steering wheel types"""
+        steering = [car.steering_wheel for car in self.cars.values() if car.steering_wheel]
+        self._plot_categorical_distribution(steering, "Steering Wheel Distribution", "Steering Type")
 
     def _load_cars_data_json(self) -> None:
         """Load cars_data.json and add technical data to existing Car objects"""
@@ -249,6 +279,10 @@ def main():
             stats_list = [s.strip().lower() for s in args.stats.split(',')]
             if 'weight' in stats_list:
                 rsf.plot_weight_stats()
+            if 'drivetrain' in stats_list:
+                rsf.plot_drivetrain_stats()
+            if 'steering' in stats_list:
+                rsf.plot_steering_stats()
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
         return 1
