@@ -89,14 +89,16 @@ class Car:
         self.cluster = None  # Store which cluster this car belongs to
 
 class Rsf:
-    def __init__(self, rsf_path: str):
+    def __init__(self, rsf_path: str, record_html: bool = False):
         """Initialize RSF configuration handler
 
         Args:
             rsf_path (str): Path to RSF installation directory
+            record_html (bool): Whether to record console output for HTML export
         """
         self.rsf_path = rsf_path
         self.features = ['weight', 'steering_wheel', 'drive_train']  # Default features
+        self.console = Console(record=record_html)
 
         # Define required files
         self.personal_ini = os.path.join(rsf_path, 'rallysimfans_personal.ini')
@@ -333,8 +335,6 @@ class Rsf:
 
     def list_undriven_cars(self) -> None:
         """Display list of undriven cars with key details"""
-        console = Console()
-
         table = Table(title="Undriven Cars", show_header=True)
         table.add_column("Car Name", style="cyan")
         table.add_column("Details", style="green")
@@ -345,14 +345,12 @@ class Rsf:
                 self.format_car_details(car)
             )
 
-        console.print("\n")
-        console.print(table)
-        console.print("\n")
+        self.console.print("\n")
+        self.console.print(table)
+        self.console.print("\n")
 
     def _log_cars_statistics(self) -> None:
         """Display statistics about loaded cars"""
-        console = Console()
-
         # Create statistics table
         table = Table(title="Car Statistics", show_header=True)
         table.add_column("Metric", style="cyan")
@@ -366,9 +364,9 @@ class Rsf:
         table.add_row("Cars with Custom FFB", str(ffb_cars))
         table.add_row("Undriven Cars", str(undriven_cars))
 
-        console.print("\n")
-        console.print(table)
-        console.print("\n")
+        self.console.print("\n")
+        self.console.print(table)
+        self.console.print("\n")
 
     def _extract_feature_values(self, car: Car) -> Optional[List[float]]:
         """Extract feature values from a car.
@@ -597,8 +595,6 @@ class Rsf:
         Args:
             selected_cars: List of selected Car objects
         """
-        console = Console()
-
         # First display cluster statistics
         cluster_stats = Table(title="Cluster Statistics", show_header=True)
         cluster_stats.add_column("Cluster", justify="right", style="magenta")
@@ -692,9 +688,9 @@ class Rsf:
             style="bold cyan"
         )
 
-        console.print("\n")
-        console.print(cluster_stats)
-        console.print("\n")
+        self.console.print("\n")
+        self.console.print(cluster_stats)
+        self.console.print("\n")
 
         # Then display selected cars
         table = Table(title=f"Selected Training Sample ({len(cluster_data)} clusters)", show_header=True)
@@ -715,9 +711,9 @@ class Rsf:
                 f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
             )
 
-        console.print("\n")
-        console.print(table)
-        console.print("\n")
+        self.console.print("\n")
+        self.console.print(table)
+        self.console.print("\n")
 
     def set_features(self, features: List[str]) -> None:
         """Set the features to use for training and prediction
@@ -821,12 +817,13 @@ def main():
     parser.add_argument('--undriven', action='store_true', help='List undriven cars')
     parser.add_argument('--select-sample', type=int, nargs='?', const=3, default=None, metavar='N',
                        help='Select N cars from each cluster for training sample (default: 3)')
+    parser.add_argument('--html', type=str, help='Save console output to HTML file')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
 
     try:
-        rsf = Rsf(args.rsf_path)
+        rsf = Rsf(args.rsf_path, record_html=bool(args.html))
 
         if args.stats:
             stats_list = [s.strip().lower() for s in args.stats.split(',')]
@@ -852,6 +849,10 @@ def main():
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
         return 1
+    finally:
+        # Save HTML output if requested
+        if args.html:
+            rsf.console.save_html(args.html)
 
     return 0
 
