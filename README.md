@@ -90,5 +90,7 @@ python power_poly.py "C:/Games/RSF" --select-sample 5 --html report.html
 
 4. **Output**:
    - Console tables with detailed statistics
-   - Optional HTML reports
+   - Optional HTML reports:
+     - General console output with `--html report.html`
+     - Cluster analysis visualization in `out/clusters.html`
    - Plots of car distributions
