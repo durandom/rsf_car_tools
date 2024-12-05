@@ -88,7 +88,17 @@ class Rsf:
         self._log_cars_statistics()
 
     def _validate_files(self) -> None:
-        """Validate all required files exist"""
+        """Validate that all required RSF configuration files exist.
+
+        Checks for the presence of:
+        - rallysimfans_personal.ini
+        - RichardBurnsRally.ini
+        - cars.json
+        - cars_data.json
+
+        Raises:
+            FileNotFoundError: If any required files are missing
+        """
         missing_files = []
 
         for filepath in [self.personal_ini, self.rbr_ini, self.cars_json, self.cars_data_json]:
@@ -101,8 +111,21 @@ class Rsf:
                 "\n".join(f"- {f}" for f in missing_files)
             )
 
-    def config_parser(self, file):
-        """Parse ini file handling comments and duplicates like rbr_pacenote_plugin"""
+    def config_parser(self, file: str) -> ConfigObj:
+        """Parse an INI configuration file with special handling for RBR format.
+
+        Handles BOM markers and converts semicolon comments to hash style.
+        Maintains compatibility with rbr_pacenote_plugin parsing style.
+
+        Args:
+            file: Path to the INI file to parse
+
+        Returns:
+            ConfigObj: Parsed configuration object
+
+        Raises:
+            Exception: If file cannot be parsed
+        """
         try:
             with open(file, 'r', encoding='utf-8') as f:
                 # strip bom and convert ; to # for comments
@@ -143,13 +166,17 @@ class Rsf:
             logger.error(f"Error loading cars.json: {str(e)}")
 
     def has_custom_ffb(self, car: Car) -> bool:
-        """Check if a car has custom FFB settings different from global defaults
+        """Check if a car has custom force feedback settings different from global defaults.
+
+        Compares the car's individual tarmac, gravel and snow FFB settings against
+        the global defaults from RichardBurnsRally.ini.
 
         Args:
-            car (Car): Car object to check
+            car: Car object to check for custom FFB settings
 
         Returns:
-            bool: True if car has custom FFB settings
+            True if the car has any FFB settings that differ from global defaults,
+            False if all settings match the defaults
         """
         return (car.ffb_tarmac != self.ffb_tarmac or
                 car.ffb_gravel != self.ffb_gravel or
@@ -162,7 +189,19 @@ class Rsf:
         logger.info(f"Loaded {total_cars} cars total, {ffb_cars} have custom FFB settings")
 
     def prepare_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
-        """Extract features and targets from cars with custom FFB settings"""
+        """Prepare feature and target arrays for FFB prediction model training.
+
+        Extracts relevant features (weight, steering angle, drivetrain) and
+        FFB settings (tarmac, gravel, snow) from cars with custom configurations.
+        Filters out cars with invalid or missing data.
+
+        Returns:
+            tuple: (features, targets) where:
+                features: ndarray of shape (n_samples, n_features) containing
+                         weight, steering angle, and drivetrain values
+                targets: ndarray of shape (n_samples, 3) containing FFB values
+                        for tarmac, gravel and snow surfaces
+        """
         features = []
         targets = []
 
@@ -185,8 +224,17 @@ class Rsf:
 
         return np.array(features), np.array(targets)
 
-    def create_ffb_model(self):
-        """Create and train polynomial regression model"""
+    def create_ffb_model(self) -> Pipeline:
+        """Create a polynomial regression pipeline for FFB prediction.
+
+        Builds a scikit-learn pipeline with:
+        1. StandardScaler for feature normalization
+        2. PolynomialFeatures for linear feature transformation
+        3. LinearRegression for prediction
+
+        Returns:
+            Pipeline: Configured scikit-learn pipeline ready for training
+        """
         # Create pipeline with scaling, polynomial features, and regression
         model = Pipeline([
             ('scaler', StandardScaler()),
