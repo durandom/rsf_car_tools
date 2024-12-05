@@ -311,9 +311,12 @@ class Rsf:
             car: Car object to check for custom FFB settings
 
         Returns:
-            True if the car has any FFB settings that differ from global defaults,
-            False if all settings match the defaults
+            True if the car has any FFB settings that differ from global defaults
+            and were not predicted by AI, False otherwise
         """
+        if car.ffb_predicted:
+            return False
+
         return (car.ffb_tarmac != self.ffb_tarmac or
                 car.ffb_gravel != self.ffb_gravel or
                 car.ffb_snow != self.ffb_snow)
