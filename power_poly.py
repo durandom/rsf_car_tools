@@ -95,6 +95,7 @@ class Rsf:
             rsf_path (str): Path to RSF installation directory
         """
         self.rsf_path = rsf_path
+        self.features = ['weight', 'steering_wheel', 'drive_train']  # Default features
 
         # Define required files
         self.personal_ini = os.path.join(rsf_path, 'rallysimfans_personal.ini')
@@ -391,14 +392,18 @@ class Rsf:
 
                 # Extract and normalize features
                 try:
-                    weight = car.weight
-                    steering = car.steering_wheel
-                    # Use pre-built drivetrain mapping
-                    drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
+                    feature_values = []
+                    for feature in self.features:
+                        if feature == 'drive_train':
+                            value = self.drive_map.get(getattr(car, feature).upper(), 0)
+                        else:
+                            value = getattr(car, feature)
+                        if not value or value <= 0:
+                            raise ValueError(f"Invalid {feature} value")
+                        feature_values.append(value)
 
-                    if weight > 0 and steering > 0 and drivetrain > 0:
-                        features.append([car.weight, car.steering_wheel, drivetrain])
-                        targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
+                    features.append(feature_values)
+                    targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
                 except (ValueError, AttributeError) as e:
                     logger.warning(f"Skipping car {car.id} due to invalid/missing data: {str(e)}")
                     continue
@@ -460,14 +465,17 @@ class Rsf:
         """Predict FFB settings for a car using trained models"""
         try:
             # Extract features
-            weight = car.weight
-            steering = car.steering_wheel
-            drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
+            feature_values = []
+            for feature in self.features:
+                if feature == 'drive_train':
+                    value = self.drive_map.get(getattr(car, feature).upper(), 0)
+                else:
+                    value = getattr(car, feature)
+                if not value or value <= 0:
+                    return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
+                feature_values.append(value)
 
-            if weight <= 0 or steering <= 0 or drivetrain <= 0:
-                return (self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
-
-            features = np.array([[weight, steering, drivetrain]])
+            features = np.array([feature_values])
 
             # Predict for each surface and ensure reasonable values
             predictions = []
@@ -500,12 +508,19 @@ class Rsf:
 
         for car in self.cars.values():
             try:
-                # Use pre-converted numeric values
-                drivetrain = self.drive_map.get(car.drive_train.upper(), 0)
+                # Extract feature values
+                feature_values = []
+                for feature in self.features:
+                    if feature == 'drive_train':
+                        value = self.drive_map.get(getattr(car, feature).upper(), 0)
+                    else:
+                        value = getattr(car, feature)
+                    if not value or value <= 0:
+                        raise ValueError(f"Invalid {feature} value")
+                    feature_values.append(value)
 
-                if car.weight > 0 and car.steering_wheel > 0 and drivetrain > 0:
-                    features.append([car.weight, car.steering_wheel, drivetrain])
-                    valid_cars.append(car)
+                features.append(feature_values)
+                valid_cars.append(car)
             except (ValueError, AttributeError):
                 continue
 
@@ -576,6 +591,15 @@ class Rsf:
         console.print("\n")
         console.print(table)
         console.print("\n")
+
+    def set_features(self, features: List[str]) -> None:
+        """Set the features to use for training and prediction
+
+        Args:
+            features: List of feature names (must be attributes of Car class)
+        """
+        self.features = features
+        logger.info(f"Set features to: {features}")
 
     def validate_predictions(self, models: dict) -> None:
         """Validate model predictions against known FFB settings"""
@@ -668,8 +692,8 @@ def main():
     parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
     parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
     parser.add_argument('--undriven', action='store_true', help='List undriven cars')
-    parser.add_argument('--select-sample', type=int, metavar='N',
-                       help='Select N cars as a training sample')
+    parser.add_argument('--select-sample', type=int, nargs='?', const=5, default=None, metavar='N',
+                       help='Select N cars as a training sample (default: 5)')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
