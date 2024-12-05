@@ -369,6 +369,30 @@ class Rsf:
         console.print(table)
         console.print("\n")
 
+    def _extract_feature_values(self, car: Car) -> Optional[List[float]]:
+        """Extract feature values from a car.
+
+        Args:
+            car: Car object to extract features from
+
+        Returns:
+            List of feature values if successful, None if any features are invalid
+        """
+        try:
+            feature_values = []
+            for feature in self.features:
+                if feature == 'drive_train':
+                    value = self.drive_map.get(getattr(car, feature).upper(), 0)
+                else:
+                    value = getattr(car, feature)
+                if not value or value <= 0:
+                    raise ValueError(f"Invalid {feature} value")
+                feature_values.append(value)
+            return feature_values
+        except (ValueError, AttributeError) as e:
+            logger.warning(f"Could not extract features from car {car.id}: {str(e)}")
+            return None
+
     def prepare_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
         """Prepare feature and target arrays for FFB prediction model training.
 
@@ -387,26 +411,11 @@ class Rsf:
         targets = []
 
         for car in self.cars.values():
-            # Only use cars with custom FFB settings
             if self.has_custom_ffb(car):
-
-                # Extract and normalize features
-                try:
-                    feature_values = []
-                    for feature in self.features:
-                        if feature == 'drive_train':
-                            value = self.drive_map.get(getattr(car, feature).upper(), 0)
-                        else:
-                            value = getattr(car, feature)
-                        if not value or value <= 0:
-                            raise ValueError(f"Invalid {feature} value")
-                        feature_values.append(value)
-
+                feature_values = self._extract_feature_values(car)
+                if feature_values:
                     features.append(feature_values)
                     targets.append([car.ffb_tarmac, car.ffb_gravel, car.ffb_snow])
-                except (ValueError, AttributeError) as e:
-                    logger.warning(f"Skipping car {car.id} due to invalid/missing data: {str(e)}")
-                    continue
 
         return np.array(features), np.array(targets)
 
@@ -507,22 +516,10 @@ class Rsf:
         valid_cars = []
 
         for car in self.cars.values():
-            try:
-                # Extract feature values
-                feature_values = []
-                for feature in self.features:
-                    if feature == 'drive_train':
-                        value = self.drive_map.get(getattr(car, feature).upper(), 0)
-                    else:
-                        value = getattr(car, feature)
-                    if not value or value <= 0:
-                        raise ValueError(f"Invalid {feature} value")
-                    feature_values.append(value)
-
+            feature_values = self._extract_feature_values(car)
+            if feature_values:
                 features.append(feature_values)
                 valid_cars.append(car)
-            except (ValueError, AttributeError):
-                continue
 
         if not features:
             logger.error("No valid cars found for clustering")
