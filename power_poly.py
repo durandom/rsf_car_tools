@@ -737,6 +737,44 @@ class Rsf:
         self.features = features
         logger.info(f"Set features to: {features}")
 
+    def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]]) -> None:
+        """Display table of FFB generation results
+
+        Args:
+            cars_with_predictions: List of (Car, (tarmac, gravel, snow)) tuples
+        """
+        table = Table(title="FFB Generation Results", show_header=True)
+        table.add_column("Car", style="cyan")
+        table.add_column("Weight", justify="right")
+        table.add_column("Steering", justify="right")
+        table.add_column("Drivetrain")
+        table.add_column("Current FFB (T/G/S)", justify="right")
+        table.add_column("Predicted FFB (T/G/S)", justify="right")
+        table.add_column("Status")
+
+        for car, predictions in cars_with_predictions:
+            # Determine row style based on whether car has custom FFB
+            row_style = "on red" if self.has_custom_ffb(car) else None
+            
+            current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+            predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
+            status = "Skipped - Custom FFB" if self.has_custom_ffb(car) else "Updated"
+
+            table.add_row(
+                f"{car.id} - {car.model}",
+                f"{car.weight}",
+                f"{car.steering_wheel}°",
+                car.drive_train,
+                current_ffb,
+                predicted_ffb,
+                status,
+                style=row_style
+            )
+
+        self.console.print("\n")
+        self.console.print(table)
+        self.console.print("\n")
+
     def generate_ai_ffb_file(self, models: dict, output_file: str) -> None:
         """Generate a new personal.ini file with AI-predicted FFB settings
 
@@ -751,6 +789,7 @@ class Rsf:
         current_car_id = None
         current_car = None
         predictions = None
+        cars_with_predictions = []
 
         logger.info(f"Starting FFB file generation: reading from {self.personal_ini}")
         logger.info(f"Writing predictions to {output_file}")
@@ -779,20 +818,19 @@ class Rsf:
                             current_car = self.cars.get(current_car_id)
                             cars_processed += 1
 
-                            if current_car and not self.has_custom_ffb(current_car):
+                            if current_car:
                                 predictions = self.predict_ffb_settings(current_car, models)
-                                cars_modified += 1
-                                logger.debug(f"Set predicted FFB for car {current_car_id}: "
-                                           f"T:{predictions[0]} G:{predictions[1]} S:{predictions[2]}")
+                                cars_with_predictions.append((current_car, predictions))
+                                if not self.has_custom_ffb(current_car):
+                                    cars_modified += 1
+                                    logger.debug(f"Set predicted FFB for car {current_car_id}: "
+                                               f"T:{predictions[0]} G:{predictions[1]} S:{predictions[2]}")
                             else:
-                                if current_car:
-                                    logger.debug(f"Skipping car {current_car_id} - already has custom FFB")
-                                else:
-                                    logger.warning(f"Car {current_car_id} found in personal.ini but not in cars.json")
+                                logger.warning(f"Car {current_car_id} found in personal.ini but not in cars.json")
                                 predictions = None
 
                     # Check for FFB settings if we have predictions for a car section
-                    if predictions and current_car:
+                    if predictions and current_car and not self.has_custom_ffb(current_car):
                         if line.strip().startswith('forcefeedbacksensitivitytarmac='):
                             line = f'forcefeedbacksensitivitytarmac={predictions[0]}\n'
                         elif line.strip().startswith('forcefeedbacksensitivitygravel='):
@@ -809,6 +847,9 @@ class Rsf:
             logger.info(f"- Total cars processed: {cars_processed}")
             logger.info(f"- Cars modified with predictions: {cars_modified}")
             logger.info(f"- Output written to: {output_file}")
+
+            # Display results table
+            self.display_ffb_generation_results(cars_with_predictions)
 
         except Exception as e:
             raise Exception(f"Error generating AI FFB file: {str(e)}")
