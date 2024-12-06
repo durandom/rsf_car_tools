@@ -14,4 +14,5 @@ dependencies = [
     "numpy",
     "scikit-learn",
     "configobj",
+    "tomli",
 ]

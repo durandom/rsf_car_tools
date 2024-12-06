@@ -22,3 +22,14 @@ all: clusters predict plots
 # Clean generated files
 clean:
 	rm -rf out/
+
+# Get version from pyproject.toml
+version:
+	@python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])"
+
+# Create a new release
+release:
+	$(eval VERSION := $(shell make version))
+	@echo "Creating release v$(VERSION)"
+	git tag "v$(VERSION)"
+	git push origin "v$(VERSION)"
