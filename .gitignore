@@ -39,7 +39,6 @@ ENV/
 .aider*
 assets/*
 *.spec
-out/
 
 # OS specific
 .DS_Store
