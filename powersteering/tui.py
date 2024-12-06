@@ -45,6 +45,8 @@ class MainDisplay(Static):
         super().__init__()
         self.ps = None
         self.renderer = ConsoleRenderer(quiet=True)
+        self.show_stats = True
+        self.show_undriven = False
 
     def set_powersteering(self, ps: PowerSteering) -> None:
         """Set the PowerSteering instance and update display"""
@@ -59,7 +61,7 @@ class MainDisplay(Static):
 
         # Get tables from renderer
         stats_table = self.renderer.create_stats_table(
-            self.ps.cars, 
+            self.ps.cars,
             self.ps.undriven_cars,
             self.ps.has_custom_ffb
         )
@@ -69,11 +71,15 @@ class MainDisplay(Static):
             self.ps.has_custom_ffb
         )
 
-        # Create a container table to hold all tables
+        # Create a container table to hold visible tables
         container = Table(show_header=False, show_edge=False, padding=1)
-        container.add_row(stats_table)
-        container.add_row(undriven_table)
-        container.add_row(custom_ffb_table)
+
+        if self.show_stats:
+            container.add_row(stats_table)
+            container.add_row(custom_ffb_table)
+
+        if self.show_undriven:
+            container.add_row(undriven_table)
 
         self.update(container)
 
@@ -83,7 +89,9 @@ class PowerSteeringApp(App):
     TITLE = "PowerSteering"
     BINDINGS = [
         ("q", "quit", "Quit"),
-        ("r", "refresh", "Refresh")
+        ("r", "refresh", "Refresh"),
+        ("s", "toggle_stats", "Statistics"),
+        ("u", "toggle_undriven", "Undriven Cars")
     ]
 
     CSS = """
@@ -134,4 +142,22 @@ class PowerSteeringApp(App):
         self.ps = PowerSteering(self.rsf_path)
         self._refresh_display()
         self.query_one(InfoBar).notify("Data refreshed")
+
+    def action_toggle_stats(self) -> None:
+        """Toggle statistics tables visibility"""
+        main_display = self.query_one(MainDisplay)
+        main_display.show_stats = not main_display.show_stats
+        if main_display.show_stats:
+            main_display.show_undriven = False
+        main_display._update_display()
+        self.query_one(InfoBar).notify("Showing statistics view")
+
+    def action_toggle_undriven(self) -> None:
+        """Toggle undriven cars table visibility"""
+        main_display = self.query_one(MainDisplay)
+        main_display.show_undriven = not main_display.show_undriven
+        if main_display.show_undriven:
+            main_display.show_stats = False
+        main_display._update_display()
+        self.query_one(InfoBar).notify("Showing undriven cars view")
 
