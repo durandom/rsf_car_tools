@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "RSF App",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/rsf_app.py",
             "args": ["--rsf-path", "${workspaceFolder}/assets/rsf"],
