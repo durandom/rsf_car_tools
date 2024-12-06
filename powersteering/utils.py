@@ -3,7 +3,7 @@ from loguru import logger
 
 def setup_logging(verbose_count: int) -> None:
     """Configure logging level based on verbosity count
-    
+
     Args:
         verbose_count: Number of times --verbose flag was specified
             0 = INFO only

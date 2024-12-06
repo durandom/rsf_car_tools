@@ -56,7 +56,7 @@ def main():
         return 1
     finally:
         if args.html:
-            ps.console.save_html(args.html)
+            ps.save_html(args.html)
 
     return 0
 

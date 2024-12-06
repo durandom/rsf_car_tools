@@ -1,4 +1,4 @@
-.PHONY: all clean clusters
+.PHONY: all clean clusters predict
 
 # Create output directory
 out:
@@ -6,11 +6,11 @@ out:
 
 # Run clustering analysis
 clusters: out
-	python ./power_poly.py assets/rsf --select-sample 20 --html out/clusters.html
+	python -m powersteering.cli assets/rsf --select-sample 20 --html out/clusters.html
 
 # Run prediction analysis
 predict: out
-	python ./power_poly.py assets/rsf --generate --html out/prediction.html
+	python -m powersteering.cli assets/rsf --generate --html out/prediction.html
 
 # Default target
 all: clusters predict

@@ -1,15 +1,14 @@
 import os
 import json
-import argparse
-import sys
 import numpy as np
 from io import StringIO
 from configobj import ConfigObj
 from typing import List, Tuple, Dict, Optional, TYPE_CHECKING
+from collections import defaultdict
 from loguru import logger
 import plotext as plt
-from rich.console import Console
-from rich.table import Table
+from .models import Car
+from .renderer import ConsoleRenderer
 
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler, MinMaxScaler
 from sklearn.linear_model import LinearRegression
@@ -18,47 +17,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.cluster import KMeans
 
 
-class Car:
-    def __init__(self, id: str, data: Dict[str, str]):
-        """Initialize car configuration
-
-        Args:
-            id (str): Car ID number
-            data (Dict[str, str]): Car configuration data from personal.ini
-        """
-        self.id = id
-        self.name = data.get('name', '')
-        self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0))
-        self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0))
-        self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0))
-        self.ffb_predicted = data.get('ffb_predicted', '').lower() == 'true'
-
-        # These will be populated from cars.json later
-        self.path = ''
-        self.hash = ''
-        self.carmodel_id = ''
-        self.user_id = ''
-        self.base_group_id = ''
-        self.ngp = ''
-        self.custom_setups = ''
-        self.rev = ''
-        self.audio = None
-        self.audio_hash = ''
-
-        # Car data attributes
-        self.power = 0
-        self.torque = 0
-        self.drive_train = ''
-        self.engine = ''
-        self.transmission = ''
-        self.weight = 0
-        self.wdf = ''
-        self.steering_wheel = 0
-        self.skin = ''
-        self.model = ''
-        self.year = ''
-        self.shifter_type = ''
-        self.cluster = None  # Store which cluster this car belongs to
 
 class PowerSteering:
     def __init__(self, rsf_path: str, record_html: bool = False, gui_mode: bool = False):
@@ -71,7 +29,7 @@ class PowerSteering:
         """
         self.rsf_path = rsf_path
         self.features = ['weight', 'steering_wheel', 'drive_train']  # Default features
-        self.console = Console(record=record_html, quiet=gui_mode)
+        self.renderer = ConsoleRenderer(record_html, gui_mode)
         self.gui_mode = gui_mode
 
         # Define required files
@@ -311,81 +269,10 @@ class PowerSteering:
 
         return f"[ID: {car_id}] {model} {year} - {drive_train}"
 
-    def list_undriven_cars(self) -> None:
-        """Display list of undriven cars with key details"""
-        table = Table(title="Undriven Cars", show_header=True)
-        table.add_column("Car Name", style="cyan")
-        table.add_column("Details", style="green")
-
-        for car_id, car in sorted(self.undriven_cars.items(), key=lambda x: x[1].name):
-            table.add_row(
-                car.name,
-                self.format_car_details(car)
-            )
-
-        self.console.print("\n")
-        self.console.print(table)
-        self.console.print("\n")
 
     def _log_cars_statistics(self) -> None:
         """Display statistics about loaded cars"""
-        # Create statistics table
-        table = Table(title="Car Statistics", show_header=True)
-        table.add_column("Metric", style="cyan")
-        table.add_column("Count", justify="right", style="green")
-
-        total_cars = len(self.cars)
-        ffb_cars = sum(1 for car in self.cars.values() if self.has_custom_ffb(car))
-        undriven_cars = len(self.undriven_cars)
-
-        table.add_row("Total Cars", str(total_cars))
-        table.add_row("Cars with Custom FFB", str(ffb_cars))
-        table.add_row("Undriven Cars", str(undriven_cars))
-
-        self.console.print("\n")
-        self.console.print(table)
-        self.console.print("\n")
-
-        # Display undriven cars table
-        undriven_table = Table(title="Undriven Cars", show_header=True)
-        undriven_table.add_column("Car", style="cyan")
-        undriven_table.add_column("Weight", justify="right")
-        undriven_table.add_column("Steering", justify="right")
-        undriven_table.add_column("Drivetrain")
-
-        for car in sorted(self.undriven_cars.values(), key=lambda x: x.name):
-            undriven_table.add_row(
-                f"{car.id} - {car.name}",
-                str(car.weight),
-                f"{car.steering_wheel}°",
-                car.drive_train
-            )
-
-        self.console.print(undriven_table)
-        self.console.print("\n")
-
-        # Display cars with custom FFB settings
-        custom_ffb_table = Table(title="Cars with Custom FFB Settings", show_header=True)
-        custom_ffb_table.add_column("Car", style="cyan")
-        custom_ffb_table.add_column("Weight", justify="right")
-        custom_ffb_table.add_column("Steering", justify="right")
-        custom_ffb_table.add_column("Drivetrain")
-        custom_ffb_table.add_column("FFB Settings (T/G/S)", justify="right")
-        custom_ffb_table.add_column("Global FFB", justify="right")
-
-        for car in sorted(self.cars.values(), key=lambda x: x.name):
-            if self.has_custom_ffb(car):
-                custom_ffb_table.add_row(
-                    f"{car.id} - {car.name}",
-                    str(car.weight),
-                    f"{car.steering_wheel}°",
-                    car.drive_train,
-                    f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}",
-                    f"{self.ffb_tarmac}/{self.ffb_gravel}/{self.ffb_snow}"
-                )
-
-        self.console.print(custom_ffb_table)
-        self.console.print("\n")
+        self.renderer.display_car_statistics(self.cars, self.undriven_cars, self.has_custom_ffb)
 
     def _extract_feature_values(self, car: Car) -> Optional[List[float]]:
         """Extract feature values from a car.
@@ -614,28 +501,17 @@ class PowerSteering:
         Args:
             selected_cars: List of selected Car objects
         """
-        # First display cluster statistics
-        cluster_stats = Table(title="Cluster Statistics", show_header=True)
-        cluster_stats.add_column("Cluster", justify="right", style="magenta")
-        cluster_stats.add_column("Size", justify="right")
-        cluster_stats.add_column("Avg Weight", justify="right")
-        cluster_stats.add_column("Avg Steering", justify="right")
-        cluster_stats.add_column("Drivetrain Distribution")
-
-        # Calculate statistics per cluster using all valid cars
-        from collections import defaultdict
+        # Calculate cluster data
         cluster_data = defaultdict(list)
-
-        # First get all valid cars and their clusters
         features = []
         valid_cars = []
+        
         for car in self.cars.values():
             feature_values = self._extract_feature_values(car)
             if feature_values:
                 features.append(feature_values)
                 valid_cars.append(car)
 
-        # Perform clustering on all valid cars
         features = np.array(features)
         scaler = MinMaxScaler()
         features_scaled = scaler.fit_transform(features)
@@ -643,105 +519,11 @@ class PowerSteering:
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         clusters = kmeans.fit_predict(features_scaled)
 
-        # Assign clusters to all valid cars
         for car, cluster_id in zip(valid_cars, clusters):
             car.cluster = cluster_id
             cluster_data[cluster_id].append(car)
 
-        for cluster_id, cars in sorted(cluster_data.items()):
-            # Calculate weight range
-            weights = [car.weight for car in cars]
-            min_weight = min(weights)
-            max_weight = max(weights)
-            weight_dist = f"{min_weight}-{max_weight} kg"
-
-            # Calculate steering range
-            steering = [car.steering_wheel for car in cars]
-            min_steering = min(steering)
-            max_steering = max(steering)
-            steering_dist = f"{min_steering}-{max_steering}°"
-
-            # Count drivetrains
-            drive_counts = defaultdict(int)
-            for car in cars:
-                drive_counts[car.drive_train] += 1
-            drive_dist = ", ".join(f"{dt}: {count}" for dt, count in drive_counts.items())
-
-            cluster_stats.add_row(
-                str(cluster_id),
-                str(len(cars)),
-                weight_dist,
-                steering_dist,
-                drive_dist
-            )
-
-        # Add summary row with distribution ranges
-        total_cars = sum(len(cars) for cars in cluster_data.values())
-
-        # Calculate weight distribution
-        all_weights = [car.weight for cars in cluster_data.values() for car in cars]
-        min_weight = min(all_weights)
-        max_weight = max(all_weights)
-        weight_dist = f"{min_weight}-{max_weight} kg"
-
-        # Calculate steering distribution
-        all_steering = [car.steering_wheel for cars in cluster_data.values() for car in cars]
-        min_steering = min(all_steering)
-        max_steering = max(all_steering)
-        steering_dist = f"{min_steering}-{max_steering}°"
-
-        # Count all drivetrains
-        all_drive_counts = defaultdict(int)
-        for cars in cluster_data.values():
-            for car in cars:
-                all_drive_counts[car.drive_train] += 1
-        all_drive_dist = ", ".join(f"{dt}: {count}" for dt, count in sorted(all_drive_counts.items()))
-
-        # Add summary row with different style
-        cluster_stats.add_row(
-            "Total",
-            str(total_cars),
-            weight_dist,
-            steering_dist,
-            all_drive_dist,
-            style="bold cyan"
-        )
-
-        self.console.print("\n")
-        self.console.print(cluster_stats)
-        self.console.print("\n")
-
-        # Then display selected cars
-        table = Table(title=f"Selected Training Sample ({len(cluster_data)} clusters)", show_header=True)
-        table.add_column("Cluster", justify="right", style="magenta")
-        table.add_column("Car", style="cyan")
-        table.add_column("Weight", justify="right")
-        table.add_column("Steering", justify="right")
-        table.add_column("Drivetrain")
-        table.add_column("FFB (T/G/S)", justify="right")
-
-        current_cluster = None
-        for car in selected_cars:
-            # Check if we're starting a new cluster
-            if current_cluster != car.cluster:
-                current_cluster = car.cluster
-                if current_cluster is not None:
-                    # Alternate between dark grey and default background
-                    row_style = "on grey30" if current_cluster % 2 == 0 else None
-
-            table.add_row(
-                str(car.cluster),
-                f"{car.id} - {car.name}",
-                f"{car.weight}",
-                f"{car.steering_wheel}°",
-                car.drive_train,
-                f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}",
-                style=row_style
-            )
-
-        self.console.print("\n")
-        self.console.print(table)
-        self.console.print("\n")
+        self.renderer.display_selected_sample(selected_cars, cluster_data)
 
     def set_features(self, features: List[str]) -> None:
         """Set the features to use for training and prediction
@@ -758,37 +540,11 @@ class PowerSteering:
         Args:
             cars_with_predictions: List of (Car, (tarmac, gravel, snow)) tuples
         """
-        table = Table(title="FFB Generation Results", show_header=True)
-        table.add_column("Car", style="cyan")
-        table.add_column("Weight", justify="right")
-        table.add_column("Steering", justify="right")
-        table.add_column("Drivetrain")
-        table.add_column("Current FFB (T/G/S)", justify="right")
-        table.add_column("Predicted FFB (T/G/S)", justify="right")
-        table.add_column("Status")
+        self.renderer.display_ffb_generation_results(cars_with_predictions, self.has_custom_ffb)
 
-        for car, predictions in cars_with_predictions:
-            # Determine row style based on whether car has custom FFB
-            row_style = "on red" if self.has_custom_ffb(car) else None
-
-            current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
-            predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
-            status = "Skipped - Custom FFB" if self.has_custom_ffb(car) else "Updated"
-
-            table.add_row(
-                f"{car.id} - {car.name}",
-                f"{car.weight}",
-                f"{car.steering_wheel}°",
-                car.drive_train,
-                current_ffb,
-                predicted_ffb,
-                status,
-                style=row_style
-            )
-
-        self.console.print("\n")
-        self.console.print(table)
-        self.console.print("\n")
+    def list_undriven_cars(self) -> None:
+        """Display list of undriven cars with their details"""
+        self.renderer.display_undriven_cars(self.undriven_cars, self.format_car_details)
 
     def generate_ai_ffb_file(self, models: dict, output_file: str) -> None:
         """Generate a new personal.ini file with AI-predicted FFB settings
@@ -868,6 +624,10 @@ class PowerSteering:
 
         except Exception as e:
             raise Exception(f"Error generating AI FFB file: {str(e)}")
+
+    def save_html(self, filename: str) -> None:
+        """Save console output to HTML file"""
+        self.renderer.save_html(filename)
 
     def validate_predictions(self, models: dict) -> None:
         """Validate model predictions against known FFB settings"""

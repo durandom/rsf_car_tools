@@ -28,134 +28,401 @@ body {
 └──────────────────────┴───────┘
 
 
-<span class="r1">                                      Undriven Cars                                      </span>
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃<span class="r2"> Car                                </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetrain                   </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│<span class="r3"> 83 - Alpine A110 Rally RGT         </span>│   1280 │     763° │ RWD                          │
-│<span class="r3"> 62 - Aston Martin Vantage RGT      </span>│   1519 │     972° │ RWD                          │
-│<span class="r3"> 68 - Audi Sport quattro GrpB       </span>│   1259 │     900° │ AWD w/o torque split (50:50) │
-│<span class="r3"> 54 - Citroen C2 GT S1600           </span>│   1200 │     763° │ FWD                          │
-│<span class="r3"> 14 - Citroen C3 WRC 2017           </span>│   1390 │     540° │ AWD with torque split        │
-│<span class="r3"> 40 - Fiat 124 Abarth Rally RGT     </span>│   1250 │     972° │ RWD                          │
-│<span class="r3"> 97 - Fiat Abarth 500 R3T           </span>│   1280 │     763° │ FWD                          │
-│<span class="r3"> 92 - Ford Fiesta Mk VI S2000       </span>│   1400 │     540° │ AWD w/o torque split (50:50) │
-│<span class="r3"> 11 - Ford Fiesta WRC 2019          </span>│   1390 │     540° │ AWD with torque split        │
-│<span class="r3"> 33 - Honda Civic Type R(FN2) R3    </span>│   1300 │     763° │ FWD                          │
-│<span class="r3"> 24 - Mitsubishi Lancer Evo IX N4   </span>│   1569 │     720° │ AWD w/o torque split (50:50) │
-│<span class="r3"> 70 - Peugeot 205 T16 GrpB          </span>│   1180 │     900° │ AWD with torque split        │
-│<span class="r3"> 79 - Seat Leon Cupra R GrpN        </span>│   1340 │    1080° │ FWD                          │
-│<span class="r3"> 98 - Skoda Fabia S2000 Evo 2       </span>│   1400 │     540° │ AWD w/o torque split (50:50) │
-│<span class="r3"> 82 - Skoda Fabia WRC 2006          </span>│   1430 │     540° │ AWD w/o torque split (50:50) │
-│<span class="r3"> 36 - Subaru Impreza N15 R4         </span>│   1519 │     778° │ AWD w/o torque split (50:50) │
-│<span class="r3"> 77 - Toyota Celica TCT (TA64) GrpB </span>│   1259 │     810° │ RWD                          │
-└────────────────────────────────────┴────────┴──────────┴──────────────────────────────┘
+<span class="r1">                                 Undriven Cars                                  </span>
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃<span class="r2"> Car                        </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetrain                  </span>┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│<span class="r3"> 83 - Alpine A110 Rally RGT </span>│   1280 │     763° │ RWD                         │
+│<span class="r3"> 62 - Aston Martin Vantage  </span>│   1519 │     972° │ RWD                         │
+│<span class="r3"> RGT                        </span>│        │          │                             │
+│<span class="r3"> 68 - Audi Sport quattro    </span>│   1259 │     900° │ AWD w/o torque split        │
+│<span class="r3"> GrpB                       </span>│        │          │ (50:50)                     │
+│<span class="r3"> 54 - Citroen C2 GT S1600   </span>│   1200 │     763° │ FWD                         │
+│<span class="r3"> 14 - Citroen C3 WRC 2017   </span>│   1390 │     540° │ AWD with torque split       │
+│<span class="r3"> 40 - Fiat 124 Abarth Rally </span>│   1250 │     972° │ RWD                         │
+│<span class="r3"> RGT                        </span>│        │          │                             │
+│<span class="r3"> 97 - Fiat Abarth 500 R3T   </span>│   1280 │     763° │ FWD                         │
+│<span class="r3"> 92 - Ford Fiesta Mk VI     </span>│   1400 │     540° │ AWD w/o torque split        │
+│<span class="r3"> S2000                      </span>│        │          │ (50:50)                     │
+│<span class="r3"> 11 - Ford Fiesta WRC 2019  </span>│   1390 │     540° │ AWD with torque split       │
+│<span class="r3"> 33 - Honda Civic Type      </span>│   1300 │     763° │ FWD                         │
+│<span class="r3"> R(FN2) R3                  </span>│        │          │                             │
+│<span class="r3"> 24 - Mitsubishi Lancer Evo </span>│   1569 │     720° │ AWD w/o torque split        │
+│<span class="r3"> IX N4                      </span>│        │          │ (50:50)                     │
+│<span class="r3"> 70 - Peugeot 205 T16 GrpB  </span>│   1180 │     900° │ AWD with torque split       │
+│<span class="r3"> 79 - Seat Leon Cupra R     </span>│   1340 │    1080° │ FWD                         │
+│<span class="r3"> GrpN                       </span>│        │          │                             │
+│<span class="r3"> 98 - Skoda Fabia S2000 Evo </span>│   1400 │     540° │ AWD w/o torque split        │
+│<span class="r3"> 2                          </span>│        │          │ (50:50)                     │
+│<span class="r3"> 82 - Skoda Fabia WRC 2006  </span>│   1430 │     540° │ AWD w/o torque split        │
+│<span class="r3">                            </span>│        │          │ (50:50)                     │
+│<span class="r3"> 36 - Subaru Impreza N15 R4 </span>│   1519 │     778° │ AWD w/o torque split        │
+│<span class="r3">                            </span>│        │          │ (50:50)                     │
+│<span class="r3"> 77 - Toyota Celica TCT     </span>│   1259 │     810° │ RWD                         │
+│<span class="r3"> (TA64) GrpB                </span>│        │          │                             │
+└────────────────────────────┴────────┴──────────┴─────────────────────────────┘
 
 
-<span class="r1">                                                 Cars with Custom FFB Settings                                                 </span>
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
-┃<span class="r2"> Car                              </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetrain                   </span>┃<span class="r2"> FFB Settings (T/G/S) </span>┃<span class="r2">     Global FFB </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
-│<span class="r3"> 66 - Audi quattro A1 GrpB        </span>│   1340 │     900° │ AWD w/o torque split (50:50) │       1200/1200/1000 │ 1500/1500/1300 │
-│<span class="r3"> 13 - Citroen Xsara WRC 2006      </span>│   1430 │     540° │ AWD w/o torque split (50:50) │       1400/1400/1200 │ 1500/1500/1300 │
-│<span class="r3"> 81 - Ford Fiesta Rally2          </span>│   1430 │     478° │ AWD w/o torque split (50:50) │       1500/1500/1450 │ 1500/1500/1300 │
-│<span class="r3"> 80 - Ford Fiesta Rally4          </span>│   1280 │     720° │ FWD                          │       1450/1450/1300 │ 1500/1500/1300 │
-│<span class="r3"> 65 - Opel Manta 400 GrpB         </span>│   1180 │     972° │ RWD                          │        1000/1000/800 │ 1500/1500/1300 │
-│<span class="r3"> 59 - Skoda Favorit 136 L GrpA    </span>│    939 │     900° │ FWD                          │          800/800/700 │ 1500/1500/1300 │
-│<span class="r3"> 22 - Subaru Impreza GC8 555 GrpA </span>│   1430 │     720° │ AWD w/o torque split (50:50) │       1400/1400/1200 │ 1500/1500/1300 │
-│<span class="r3"> 75 - VW Golf II GTI 16V GrpA     </span>│   1119 │    1092° │ FWD                          │       1200/1200/1100 │ 1500/1500/1300 │
-└──────────────────────────────────┴────────┴──────────┴──────────────────────────────┴──────────────────────┴────────────────┘
+<span class="r1">                         Cars with Custom FFB Settings                          </span>
+┏━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃<span class="r2">              </span>┃<span class="r2">        </span>┃<span class="r2">          </span>┃<span class="r2">              </span>┃<span class="r2"> FFB Settings </span>┃<span class="r2">             </span>┃
+┃<span class="r2"> Car          </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetrain   </span>┃<span class="r2">      (T/G/S) </span>┃<span class="r2">  Global FFB </span>┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│<span class="r3"> 66 - Audi    </span>│   1340 │     900° │ AWD w/o      │ 1200/1200/1… │ 1200/1200/… │
+│<span class="r3"> quattro A1   </span>│        │          │ torque split │              │             │
+│<span class="r3"> GrpB         </span>│        │          │ (50:50)      │              │             │
+│<span class="r3"> 13 - Citroen </span>│   1430 │     540° │ AWD w/o      │ 1400/1400/1… │ 1400/1400/… │
+│<span class="r3"> Xsara WRC    </span>│        │          │ torque split │              │             │
+│<span class="r3"> 2006         </span>│        │          │ (50:50)      │              │             │
+│<span class="r3"> 81 - Ford    </span>│   1430 │     478° │ AWD w/o      │ 1500/1500/1… │ 1500/1500/… │
+│<span class="r3"> Fiesta       </span>│        │          │ torque split │              │             │
+│<span class="r3"> Rally2       </span>│        │          │ (50:50)      │              │             │
+│<span class="r3"> 80 - Ford    </span>│   1280 │     720° │ FWD          │ 1450/1450/1… │ 1450/1450/… │
+│<span class="r3"> Fiesta       </span>│        │          │              │              │             │
+│<span class="r3"> Rally4       </span>│        │          │              │              │             │
+│<span class="r3"> 65 - Opel    </span>│   1180 │     972° │ RWD          │ 1000/1000/8… │ 1000/1000/… │
+│<span class="r3"> Manta 400    </span>│        │          │              │              │             │
+│<span class="r3"> GrpB         </span>│        │          │              │              │             │
+│<span class="r3"> 59 - Skoda   </span>│    939 │     900° │ FWD          │  800/800/700 │ 800/800/700 │
+│<span class="r3"> Favorit 136  </span>│        │          │              │              │             │
+│<span class="r3"> L GrpA       </span>│        │          │              │              │             │
+│<span class="r3"> 22 - Subaru  </span>│   1430 │     720° │ AWD w/o      │ 1400/1400/1… │ 1400/1400/… │
+│<span class="r3"> Impreza GC8  </span>│        │          │ torque split │              │             │
+│<span class="r3"> 555 GrpA     </span>│        │          │ (50:50)      │              │             │
+│<span class="r3"> 75 - VW Golf </span>│   1119 │    1092° │ FWD          │ 1200/1200/1… │ 1200/1200/… │
+│<span class="r3"> II GTI 16V   </span>│        │          │              │              │             │
+│<span class="r3"> GrpA         </span>│        │          │              │              │             │
+└──────────────┴────────┴──────────┴──────────────┴──────────────┴─────────────┘
 
 
 
 
-<span class="r1">                                                                     FFB Generation Results                                                                      </span>
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
-┃<span class="r2"> Car                                   </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetrain                   </span>┃<span class="r2"> Current FFB (T/G/S) </span>┃<span class="r2"> Predicted FFB (T/G/S) </span>┃<span class="r2"> Status               </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│<span class="r5"> 13 - Citroen Xsara WRC 2006           </span>│<span class="r6">   1430 </span>│<span class="r6">     540° </span>│<span class="r6"> AWD w/o torque split (50:50) </span>│<span class="r6">      1400/1400/1200 </span>│<span class="r6">        1455/1455/1378 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r5"> 75 - VW Golf II GTI 16V GrpA          </span>│<span class="r6">   1119 </span>│<span class="r6">    1092° </span>│<span class="r6"> FWD                          </span>│<span class="r6">      1200/1200/1100 </span>│<span class="r6">        1200/1200/1100 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 28 - Ford Fiesta R2                   </span>│   1230 │     968° │ FWD                          │      1500/1500/1300 │        1313/1313/1166 │ Updated              │
-│<span class="r3"> 45 - VW Polo GTI R5                   </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 101 - Mini JCW WRC                    </span>│   1400 │     446° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1492/1492/1453 │ Updated              │
-│<span class="r3"> 23 - Porsche 911 SC RS GrpB           </span>│   1160 │    1019° │ RWD                          │      1500/1500/1300 │           939/939/745 │ Updated              │
-│<span class="r3"> 10 - VW Polo R WRC 2016               </span>│   1400 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1427/1427/1350 │ Updated              │
-│<span class="r3"> 71 - Ford Fiesta Mk VIII R2           </span>│   1230 │     720° │ FWD                          │      1500/1500/1300 │        1431/1431/1281 │ Updated              │
-│<span class="r3"> 31 - Renault Twingo R2 Evo            </span>│   1230 │     968° │ FWD                          │      1500/1500/1300 │        1313/1313/1166 │ Updated              │
-│<span class="r3"> 78 - Ford Escort Mk II RS Grp4        </span>│   1180 │     900° │ RWD                          │      1500/1500/1300 │         1072/1072/873 │ Updated              │
-│<span class="r3"> 19 - Opel Ascona 400 Grp4             </span>│   1250 │    1080° │ RWD                          │      1500/1500/1300 │           935/935/741 │ Updated              │
-│<span class="r3"> 100 - Fiat 131 Abarth Grp4            </span>│   1230 │    1026° │ RWD                          │      1500/1500/1300 │           977/977/776 │ Updated              │
-│<span class="r5"> 65 - Opel Manta 400 GrpB              </span>│<span class="r6">   1180 </span>│<span class="r6">     972° </span>│<span class="r6"> RWD                          </span>│<span class="r6">       1000/1000/800 </span>│<span class="r6">         1000/1000/800 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 84 - Lancia Stratos HF Grp4           </span>│   1129 │     900° │ RWD                          │      1500/1500/1300 │         1025/1025/832 │ Updated              │
-│<span class="r3"> 52 - Porsche 911 SC 3.0 Grp4          </span>│   1190 │    1019° │ RWD                          │      1500/1500/1300 │           962/962/764 │ Updated              │
-│<span class="r3"> 12 - Citroen C4 WRC 2008              </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 15 - Hyundai i20 Coupe WRC 2017       </span>│   1390 │     540° │ AWD with torque split        │      1500/1500/1300 │        1531/1531/1421 │ Updated              │
-│<span class="r3"> 104 - Hyundai i20 Coupe WRC 2021      </span>│   1390 │     540° │ AWD with torque split        │      1500/1500/1300 │        1531/1531/1421 │ Updated              │
-│<span class="r3"> 102 - Hyundai i20 N Rally2            </span>│   1430 │     443° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1526/1526/1490 │ Updated              │
-│<span class="r3"> 38 - Hyundai i20 R5                   </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r5"> 22 - Subaru Impreza GC8 555 GrpA      </span>│<span class="r6">   1430 </span>│<span class="r6">     720° </span>│<span class="r6"> AWD w/o torque split (50:50) </span>│<span class="r6">      1400/1400/1200 </span>│<span class="r6">        1332/1332/1175 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 91 - Abarth Grande Punto S2000        </span>│   1400 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1427/1427/1350 │ Updated              │
-│<span class="r3"> 9 - Ford Fiesta RS WRC 2014           </span>│   1400 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1427/1427/1350 │ Updated              │
-│<span class="r5"> 80 - Ford Fiesta Rally4               </span>│<span class="r6">   1280 </span>│<span class="r6">     720° </span>│<span class="r6"> FWD                          </span>│<span class="r6">      1450/1450/1300 </span>│<span class="r6">        1450/1450/1300 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 96 - Renault Clio Rally5              </span>│   1280 │     720° │ FWD                          │      1500/1500/1300 │        1450/1450/1300 │ Updated              │
-│<span class="r3"> 42 - Skoda Fabia R5 evo               </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 30 - Peugeot 208 R2                   </span>│   1230 │     968° │ FWD                          │      1500/1500/1300 │        1313/1313/1166 │ Updated              │
-│<span class="r3"> 27 - Citroen C2 R2 Max                </span>│   1230 │     968° │ FWD                          │      1500/1500/1300 │        1313/1313/1166 │ Updated              │
-│<span class="r3"> 29 - Opel ADAM R2                     </span>│   1230 │     968° │ FWD                          │      1500/1500/1300 │        1313/1313/1166 │ Updated              │
-│<span class="r3"> 56 - Mitsubishi Lancer Evo X R4       </span>│   1519 │     720° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1486/1486/1311 │ Updated              │
-│<span class="r3"> 95 - Peugeot 306 Maxi Kit Car         </span>│   1160 │     885° │ FWD                          │      1500/1500/1300 │        1316/1316/1166 │ Updated              │
-│<span class="r3"> 51 - Citroen DS3 R5                   </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 88 - Ford Fiesta Rally3               </span>│   1410 │     565° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1418/1418/1330 │ Updated              │
-│<span class="r3"> 103 - Peugeot 208 T16 R5              </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 63 - Porsche 911 GT3 RS (2007) RGT    </span>│   1430 │     943° │ RWD                          │      1500/1500/1300 │        1237/1237/1021 │ Updated              │
-│<span class="r3"> 39 - Skoda Fabia R5                   </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 57 - Subaru Impreza GDA WRC2003 (S9)  </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 43 - Ford Escort Mk V RS Cosworth Grp </span>│   1420 │     864° │ AWD with torque split        │      1500/1500/1300 │        1412/1412/1239 │ Updated              │
-│<span class="r3"> 21 - Renault Clio 16S Williams GrpA   </span>│   1190 │     900° │ FWD                          │      1500/1500/1300 │        1327/1327/1175 │ Updated              │
-│<span class="r3"> 86 - Peugeot 106 Rallye S20 GrpA      </span>│    971 │     968° │ FWD                          │      1500/1500/1300 │           901/901/800 │ Updated              │
-│<span class="r3"> 60 - Lada Kalina RC2 GrpA             </span>│   1280 │    1116° │ FWD                          │      1500/1500/1300 │        1266/1266/1151 │ Updated              │
-│<span class="r3"> 25 - Citroen DS3 R1                   </span>│   1230 │    1080° │ FWD                          │      1500/1500/1300 │        1270/1270/1149 │ Updated              │
-│<span class="r3"> 26 - Renault Twingo R1                </span>│   1230 │     968° │ FWD                          │      1500/1500/1300 │        1313/1313/1166 │ Updated              │
-│<span class="r3"> 99 - BMW M1 GrpB                      </span>│   1349 │     744° │ RWD                          │      1500/1500/1300 │        1366/1366/1179 │ Updated              │
-│<span class="r3"> 46 - Wartburg 353 W 460 GrpA          </span>│   1005 │    1080° │ FWD                          │      1500/1500/1300 │           971/971/893 │ Updated              │
-│<span class="r3"> 58 - Skoda 130 RS Grp2                </span>│   1069 │     900° │ RWD                          │      1500/1500/1300 │           934/934/751 │ Updated              │
-│<span class="r3"> 85 - Peugeot 208 Rally4               </span>│   1280 │     720° │ FWD                          │      1500/1500/1300 │        1450/1450/1300 │ Updated              │
-│<span class="r3"> 8 - Citroen DS3 WRC                   </span>│   1400 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1427/1427/1350 │ Updated              │
-│<span class="r3"> 18 - Audi quattro Grp4                </span>│   1440 │     900° │ AWD w/o torque split (50:50) │      1500/1500/1300 │         1223/1223/999 │ Updated              │
-│<span class="r3"> 44 - Renault 5 GT Turbo GrpA          </span>│    974 │     972° │ FWD                          │      1500/1500/1300 │           910/910/810 │ Updated              │
-│<span class="r3"> 89 - BMW M3 E36 GrpA                  </span>│   1390 │    1080° │ RWD                          │      1500/1500/1300 │         1024/1024/816 │ Updated              │
-│<span class="r3"> 61 - Skoda 130 LR GrpB                </span>│   1020 │     900° │ RWD                          │      1500/1500/1300 │           818/818/648 │ Updated              │
-│<span class="r3"> 37 - Ford Fiesta R5                   </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 35 - Renault Clio IV R3T              </span>│   1280 │     763° │ FWD                          │      1500/1500/1300 │        1426/1426/1272 │ Updated              │
-│<span class="r3"> 64 - Lotus Exige S RGT                </span>│   1084 │     900° │ RWD                          │      1500/1500/1300 │           961/961/775 │ Updated              │
-│<span class="r3"> 49 - Mitsubishi Lancer Evo II GrpA    </span>│   1400 │     619° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1375/1375/1263 │ Updated              │
-│<span class="r3"> 48 - Mitsubishi Lancer Evo IX R4      </span>│   1519 │     720° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1486/1486/1311 │ Updated              │
-│<span class="r3"> 94 - Citroen Xsara Kit Car            </span>│   1160 │     885° │ FWD                          │      1500/1500/1300 │        1316/1316/1166 │ Updated              │
-│<span class="r3"> 32 - Citroen DS3 R3-MAX               </span>│   1280 │     763° │ FWD                          │      1500/1500/1300 │        1426/1426/1272 │ Updated              │
-│<span class="r3"> 34 - Renault Clio III R3              </span>│   1280 │     763° │ FWD                          │      1500/1500/1300 │        1426/1426/1272 │ Updated              │
-│<span class="r3"> 76 - Hyundai i20 Coupe WRC 2020       </span>│   1390 │     540° │ AWD with torque split        │      1500/1500/1300 │        1531/1531/1421 │ Updated              │
-│<span class="r3"> 55 - Ford Focus Mk II RS WRC 2006     </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 41 - Lada VFTS GrpB                   </span>│   1020 │    1080° │ RWD                          │      1500/1500/1300 │           636/636/482 │ Updated              │
-│<span class="r3"> 67 - Audi quattro A2 GrpB             </span>│   1300 │     900° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1214/1214/1021 │ Updated              │
-│<span class="r5"> 59 - Skoda Favorit 136 L GrpA         </span>│<span class="r6">    939 </span>│<span class="r6">     900° </span>│<span class="r6"> FWD                          </span>│<span class="r6">         800/800/700 </span>│<span class="r6">           800/800/700 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 105 - Volvo 240 Turbo GrpA            </span>│   1349 │    1007° │ RWD                          │      1500/1500/1300 │         1061/1061/850 │ Updated              │
-│<span class="r3"> 47 - Subaru Impreza N14 N4            </span>│   1610 │     778° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1773/1773/1534 │ Updated              │
-│<span class="r3"> 72 - Audi 200 quattro GrpA            </span>│   1449 │     958° │ AWD w/o torque split (50:50) │      1500/1500/1300 │         1191/1191/952 │ Updated              │
-│<span class="r3"> 16 - Toyota Yaris WRC 2018            </span>│   1390 │     540° │ AWD with torque split        │      1500/1500/1300 │        1531/1531/1421 │ Updated              │
-│<span class="r3"> 74 - Mazda 323 BF 4WD Turbo GrpA      </span>│   1300 │     842° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1244/1244/1061 │ Updated              │
-│<span class="r3"> 20 - Trabant P 800 RS GrpA            </span>│    780 │     756° │ FWD                          │      1500/1500/1300 │              50/50/50 │ Updated              │
-│<span class="r3"> 90 - Peugeot 207 S2000 Evolution Plus </span>│   1400 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1427/1427/1350 │ Updated              │
-│<span class="r3"> 73 - Lancia Delta HF 4WD GrpA         </span>│   1400 │     720° │ AWD with torque split        │      1500/1500/1300 │        1453/1453/1306 │ Updated              │
-│<span class="r3"> 50 - Porsche 911 GT3 RS (2010) RGT    </span>│   1400 │     943° │ RWD                          │      1500/1500/1300 │         1188/1188/974 │ Updated              │
-│<span class="r5"> 66 - Audi quattro A1 GrpB             </span>│<span class="r6">   1340 </span>│<span class="r6">     900° </span>│<span class="r6"> AWD w/o torque split (50:50) </span>│<span class="r6">      1200/1200/1000 </span>│<span class="r6">        1200/1200/1000 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 17 - Fiat 126 Grp2                    </span>│    729 │     835° │ RWD                          │      1500/1500/1300 │              50/50/50 │ Updated              │
-│<span class="r5"> 81 - Ford Fiesta Rally2               </span>│<span class="r6">   1430 </span>│<span class="r6">     478° </span>│<span class="r6"> AWD w/o torque split (50:50) </span>│<span class="r6">      1500/1500/1450 </span>│<span class="r6">        1500/1500/1450 </span>│<span class="r6"> Skipped - Custom FFB </span>│
-│<span class="r3"> 87 - BMW M3 E30 GrpA                  </span>│   1225 │     864° │ RWD                          │      1500/1500/1300 │         1139/1139/938 │ Updated              │
-│<span class="r3"> 93 - Renault Clio Rally4              </span>│   1280 │     720° │ FWD                          │      1500/1500/1300 │        1450/1450/1300 │ Updated              │
-│<span class="r3"> 53 - Toyota Celica 2000GT(ST185) GrpA </span>│   1319 │     720° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1302/1302/1154 │ Updated              │
-│<span class="r3"> 69 - Citroen C3 R5                    </span>│   1430 │     540° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1455/1455/1378 │ Updated              │
-│<span class="r3"> 106 - Skoda Fabia RS Rally2           </span>│   1430 │     428° │ AWD w/o torque split (50:50) │      1500/1500/1300 │        1538/1538/1507 │ Updated              │
-└───────────────────────────────────────┴────────┴──────────┴──────────────────────────────┴─────────────────────┴───────────────────────┴──────────────────────┘
+<span class="r1">                             FFB Generation Results                             </span>
+┏━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
+┃<span class="r2">           </span>┃<span class="r2">        </span>┃<span class="r2">          </span>┃<span class="r2">           </span>┃<span class="r2">   Current </span>┃<span class="r2"> Predicted </span>┃<span class="r2">          </span>┃
+┃<span class="r2">           </span>┃<span class="r2">        </span>┃<span class="r2">          </span>┃<span class="r2">           </span>┃<span class="r2">       FFB </span>┃<span class="r2">       FFB </span>┃<span class="r2">          </span>┃
+┃<span class="r2"> Car       </span>┃<span class="r2"> Weight </span>┃<span class="r2"> Steering </span>┃<span class="r2"> Drivetra… </span>┃<span class="r2">   (T/G/S) </span>┃<span class="r2">   (T/G/S) </span>┃<span class="r2"> Status   </span>┃
+┡━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
+│<span class="r5"> 13 -      </span>│<span class="r6">   1430 </span>│<span class="r6">     540° </span>│<span class="r6"> AWD w/o   </span>│<span class="r6"> 1400/140… </span>│<span class="r6"> 1485/148… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Citroen   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> torque    </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> Xsara WRC </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> split     </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r5"> 2006      </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> (50:50)   </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r5"> 75 - VW   </span>│<span class="r6">   1119 </span>│<span class="r6">    1092° </span>│<span class="r6"> FWD       </span>│<span class="r6"> 1200/120… </span>│<span class="r6"> 1200/120… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Golf II   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> GTI 16V   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r5"> GrpA      </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r3"> 28 - Ford </span>│   1230 │     968° │ FWD       │ 1500/150… │ 1342/134… │ Updated  │
+│<span class="r3"> Fiesta R2 </span>│        │          │           │           │           │          │
+│<span class="r3"> 45 - VW   </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Polo GTI  </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> R5        </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 101 -     </span>│   1400 │     446° │ AWD w/o   │ 1500/150… │ 1452/145… │ Updated  │
+│<span class="r3"> Mini JCW  </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> WRC       </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 23 -      </span>│   1160 │    1019° │ RWD       │ 1500/150… │ 1434/143… │ Updated  │
+│<span class="r3"> Porsche   </span>│        │          │           │           │           │          │
+│<span class="r3"> 911 SC RS </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpB      </span>│        │          │           │           │           │          │
+│<span class="r3"> 10 - VW   </span>│   1400 │     540° │ AWD w/o   │ 1500/150… │ 1437/143… │ Updated  │
+│<span class="r3"> Polo R    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> WRC 2016  </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 71 - Ford </span>│   1230 │     720° │ FWD       │ 1500/150… │ 1437/143… │ Updated  │
+│<span class="r3"> Fiesta Mk </span>│        │          │           │           │           │          │
+│<span class="r3"> VIII R2   </span>│        │          │           │           │           │          │
+│<span class="r3"> 31 -      </span>│   1230 │     968° │ FWD       │ 1500/150… │ 1342/134… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Twingo R2 </span>│        │          │           │           │           │          │
+│<span class="r3"> Evo       </span>│        │          │           │           │           │          │
+│<span class="r3"> 78 - Ford </span>│   1180 │     900° │ RWD       │ 1500/150… │ 1572/157… │ Updated  │
+│<span class="r3"> Escort Mk </span>│        │          │           │           │           │          │
+│<span class="r3"> II RS     </span>│        │          │           │           │           │          │
+│<span class="r3"> Grp4      </span>│        │          │           │           │           │          │
+│<span class="r3"> 19 - Opel </span>│   1250 │    1080° │ RWD       │ 1500/150… │ 1502/150… │ Updated  │
+│<span class="r3"> Ascona    </span>│        │          │           │           │           │          │
+│<span class="r3"> 400 Grp4  </span>│        │          │           │           │           │          │
+│<span class="r3"> 100 -     </span>│   1230 │    1026° │ RWD       │ 1500/150… │ 1521/152… │ Updated  │
+│<span class="r3"> Fiat 131  </span>│        │          │           │           │           │          │
+│<span class="r3"> Abarth    </span>│        │          │           │           │           │          │
+│<span class="r3"> Grp4      </span>│        │          │           │           │           │          │
+│<span class="r5"> 65 - Opel </span>│<span class="r6">   1180 </span>│<span class="r6">     972° </span>│<span class="r6"> RWD       </span>│<span class="r6"> 1000/100… </span>│<span class="r6"> 1505/150… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Manta 400 </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> GrpB      </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r3"> 84 -      </span>│   1129 │     900° │ RWD       │ 1500/150… │ 1491/149… │ Updated  │
+│<span class="r3"> Lancia    </span>│        │          │           │           │           │          │
+│<span class="r3"> Stratos   </span>│        │          │           │           │           │          │
+│<span class="r3"> HF Grp4   </span>│        │          │           │           │           │          │
+│<span class="r3"> 52 -      </span>│   1190 │    1019° │ RWD       │ 1500/150… │ 1480/148… │ Updated  │
+│<span class="r3"> Porsche   </span>│        │          │           │           │           │          │
+│<span class="r3"> 911 SC    </span>│        │          │           │           │           │          │
+│<span class="r3"> 3.0 Grp4  </span>│        │          │           │           │           │          │
+│<span class="r3"> 12 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> C4 WRC    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> 2008      </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 15 -      </span>│   1390 │     540° │ AWD with  │ 1500/150… │ 1419/141… │ Updated  │
+│<span class="r3"> Hyundai   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> i20 Coupe </span>│        │          │ split     │           │           │          │
+│<span class="r3"> WRC 2017  </span>│        │          │           │           │           │          │
+│<span class="r3"> 104 -     </span>│   1390 │     540° │ AWD with  │ 1500/150… │ 1419/141… │ Updated  │
+│<span class="r3"> Hyundai   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> i20 Coupe </span>│        │          │ split     │           │           │          │
+│<span class="r3"> WRC 2021  </span>│        │          │           │           │           │          │
+│<span class="r3"> 102 -     </span>│   1430 │     443° │ AWD w/o   │ 1500/150… │ 1505/150… │ Updated  │
+│<span class="r3"> Hyundai   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> i20 N     </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Rally2    </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 38 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Hyundai   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> i20 R5    </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r5"> 22 -      </span>│<span class="r6">   1430 </span>│<span class="r6">     720° </span>│<span class="r6"> AWD w/o   </span>│<span class="r6"> 1400/140… </span>│<span class="r6"> 1400/140… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Subaru    </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> torque    </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> Impreza   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> split     </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r5"> GC8 555   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> (50:50)   </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r5"> GrpA      </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r3"> 91 -      </span>│   1400 │     540° │ AWD w/o   │ 1500/150… │ 1437/143… │ Updated  │
+│<span class="r3"> Abarth    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Grande    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Punto     </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> S2000     </span>│        │          │           │           │           │          │
+│<span class="r3"> 9 - Ford  </span>│   1400 │     540° │ AWD w/o   │ 1500/150… │ 1437/143… │ Updated  │
+│<span class="r3"> Fiesta RS </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> WRC 2014  </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r5"> 80 - Ford </span>│<span class="r6">   1280 </span>│<span class="r6">     720° </span>│<span class="r6"> FWD       </span>│<span class="r6"> 1450/145… </span>│<span class="r6"> 1450/145… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Fiesta    </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> Rally4    </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r3"> 96 -      </span>│   1280 │     720° │ FWD       │ 1500/150… │ 1450/145… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Clio      </span>│        │          │           │           │           │          │
+│<span class="r3"> Rally5    </span>│        │          │           │           │           │          │
+│<span class="r3"> 42 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Skoda     </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Fabia R5  </span>│        │          │ split     │           │           │          │
+│<span class="r3"> evo       </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 30 -      </span>│   1230 │     968° │ FWD       │ 1500/150… │ 1342/134… │ Updated  │
+│<span class="r3"> Peugeot   </span>│        │          │           │           │           │          │
+│<span class="r3"> 208 R2    </span>│        │          │           │           │           │          │
+│<span class="r3"> 27 -      </span>│   1230 │     968° │ FWD       │ 1500/150… │ 1342/134… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │           │           │           │          │
+│<span class="r3"> C2 R2 Max </span>│        │          │           │           │           │          │
+│<span class="r3"> 29 - Opel </span>│   1230 │     968° │ FWD       │ 1500/150… │ 1342/134… │ Updated  │
+│<span class="r3"> ADAM R2   </span>│        │          │           │           │           │          │
+│<span class="r3"> 56 -      </span>│   1519 │     720° │ AWD w/o   │ 1500/150… │ 1583/158… │ Updated  │
+│<span class="r3"> Mitsubis… </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Lancer    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Evo X R4  </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 95 -      </span>│   1160 │     885° │ FWD       │ 1500/150… │ 1329/132… │ Updated  │
+│<span class="r3"> Peugeot   </span>│        │          │           │           │           │          │
+│<span class="r3"> 306 Maxi  </span>│        │          │           │           │           │          │
+│<span class="r3"> Kit Car   </span>│        │          │           │           │           │          │
+│<span class="r3"> 51 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> DS3 R5    </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 88 - Ford </span>│   1410 │     565° │ AWD w/o   │ 1500/150… │ 1445/144… │ Updated  │
+│<span class="r3"> Fiesta    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Rally3    </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 103 -     </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Peugeot   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> 208 T16   </span>│        │          │ split     │           │           │          │
+│<span class="r3"> R5        </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 63 -      </span>│   1430 │     943° │ RWD       │ 1500/150… │ 1707/170… │ Updated  │
+│<span class="r3"> Porsche   </span>│        │          │           │           │           │          │
+│<span class="r3"> 911 GT3   </span>│        │          │           │           │           │          │
+│<span class="r3"> RS (2007) </span>│        │          │           │           │           │          │
+│<span class="r3"> RGT       </span>│        │          │           │           │           │          │
+│<span class="r3"> 39 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Skoda     </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Fabia R5  </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 57 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Subaru    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Impreza   </span>│        │          │ split     │           │           │          │
+│<span class="r3"> GDA       </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> WRC2003   </span>│        │          │           │           │           │          │
+│<span class="r3"> (S9)      </span>│        │          │           │           │           │          │
+│<span class="r3"> 43 - Ford </span>│   1420 │     864° │ AWD with  │ 1500/150… │ 1356/135… │ Updated  │
+│<span class="r3"> Escort Mk </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> V RS      </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Cosworth  </span>│        │          │           │           │           │          │
+│<span class="r3"> Grp       </span>│        │          │           │           │           │          │
+│<span class="r3"> 21 -      </span>│   1190 │     900° │ FWD       │ 1500/150… │ 1345/134… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Clio 16S  </span>│        │          │           │           │           │          │
+│<span class="r3"> Williams  </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 86 -      </span>│    971 │     968° │ FWD       │ 1500/150… │ 881/881/… │ Updated  │
+│<span class="r3"> Peugeot   </span>│        │          │           │           │           │          │
+│<span class="r3"> 106       </span>│        │          │           │           │           │          │
+│<span class="r3"> Rallye    </span>│        │          │           │           │           │          │
+│<span class="r3"> S20 GrpA  </span>│        │          │           │           │           │          │
+│<span class="r3"> 60 - Lada </span>│   1280 │    1116° │ FWD       │ 1500/150… │ 1311/131… │ Updated  │
+│<span class="r3"> Kalina    </span>│        │          │           │           │           │          │
+│<span class="r3"> RC2 GrpA  </span>│        │          │           │           │           │          │
+│<span class="r3"> 25 -      </span>│   1230 │    1080° │ FWD       │ 1500/150… │ 1306/130… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │           │           │           │          │
+│<span class="r3"> DS3 R1    </span>│        │          │           │           │           │          │
+│<span class="r3"> 26 -      </span>│   1230 │     968° │ FWD       │ 1500/150… │ 1342/134… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Twingo R1 </span>│        │          │           │           │           │          │
+│<span class="r3"> 99 - BMW  </span>│   1349 │     744° │ RWD       │ 1500/150… │ 1844/184… │ Updated  │
+│<span class="r3"> M1 GrpB   </span>│        │          │           │           │           │          │
+│<span class="r3"> 46 -      </span>│   1005 │    1080° │ FWD       │ 1500/150… │ 936/936/… │ Updated  │
+│<span class="r3"> Wartburg  </span>│        │          │           │           │           │          │
+│<span class="r3"> 353 W 460 </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 58 -      </span>│   1069 │     900° │ RWD       │ 1500/150… │ 1352/135… │ Updated  │
+│<span class="r3"> Skoda 130 </span>│        │          │           │           │           │          │
+│<span class="r3"> RS Grp2   </span>│        │          │           │           │           │          │
+│<span class="r3"> 85 -      </span>│   1280 │     720° │ FWD       │ 1500/150… │ 1450/145… │ Updated  │
+│<span class="r3"> Peugeot   </span>│        │          │           │           │           │          │
+│<span class="r3"> 208       </span>│        │          │           │           │           │          │
+│<span class="r3"> Rally4    </span>│        │          │           │           │           │          │
+│<span class="r3"> 8 -       </span>│   1400 │     540° │ AWD w/o   │ 1500/150… │ 1437/143… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> DS3 WRC   </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 18 - Audi </span>│   1440 │     900° │ AWD w/o   │ 1500/150… │ 1267/126… │ Updated  │
+│<span class="r3"> quattro   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Grp4      </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 44 -      </span>│    974 │     972° │ FWD       │ 1500/150… │ 889/889/… │ Updated  │
+│<span class="r3"> Renault 5 </span>│        │          │           │           │           │          │
+│<span class="r3"> GT Turbo  </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 89 - BMW  </span>│   1390 │    1080° │ RWD       │ 1500/150… │ 1585/158… │ Updated  │
+│<span class="r3"> M3 E36    </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 61 -      </span>│   1020 │     900° │ RWD       │ 1500/150… │ 1195/119… │ Updated  │
+│<span class="r3"> Skoda 130 </span>│        │          │           │           │           │          │
+│<span class="r3"> LR GrpB   </span>│        │          │           │           │           │          │
+│<span class="r3"> 37 - Ford </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Fiesta R5 </span>│        │          │ torque    │           │           │          │
+│<span class="r3">           </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 35 -      </span>│   1280 │     763° │ FWD       │ 1500/150… │ 1433/143… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Clio IV   </span>│        │          │           │           │           │          │
+│<span class="r3"> R3T       </span>│        │          │           │           │           │          │
+│<span class="r3"> 64 -      </span>│   1084 │     900° │ RWD       │ 1500/150… │ 1391/139… │ Updated  │
+│<span class="r3"> Lotus     </span>│        │          │           │           │           │          │
+│<span class="r3"> Exige S   </span>│        │          │           │           │           │          │
+│<span class="r3"> RGT       </span>│        │          │           │           │           │          │
+│<span class="r3"> 49 -      </span>│   1400 │     619° │ AWD w/o   │ 1500/150… │ 1412/141… │ Updated  │
+│<span class="r3"> Mitsubis… </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Lancer    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Evo II    </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 48 -      </span>│   1519 │     720° │ AWD w/o   │ 1500/150… │ 1583/158… │ Updated  │
+│<span class="r3"> Mitsubis… </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Lancer    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Evo IX R4 </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 94 -      </span>│   1160 │     885° │ FWD       │ 1500/150… │ 1329/132… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │           │           │           │          │
+│<span class="r3"> Xsara Kit </span>│        │          │           │           │           │          │
+│<span class="r3"> Car       </span>│        │          │           │           │           │          │
+│<span class="r3"> 32 -      </span>│   1280 │     763° │ FWD       │ 1500/150… │ 1433/143… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │           │           │           │          │
+│<span class="r3"> DS3       </span>│        │          │           │           │           │          │
+│<span class="r3"> R3-MAX    </span>│        │          │           │           │           │          │
+│<span class="r3"> 34 -      </span>│   1280 │     763° │ FWD       │ 1500/150… │ 1433/143… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Clio III  </span>│        │          │           │           │           │          │
+│<span class="r3"> R3        </span>│        │          │           │           │           │          │
+│<span class="r3"> 76 -      </span>│   1390 │     540° │ AWD with  │ 1500/150… │ 1419/141… │ Updated  │
+│<span class="r3"> Hyundai   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> i20 Coupe </span>│        │          │ split     │           │           │          │
+│<span class="r3"> WRC 2020  </span>│        │          │           │           │           │          │
+│<span class="r3"> 55 - Ford </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Focus Mk  </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> II RS WRC </span>│        │          │ split     │           │           │          │
+│<span class="r3"> 2006      </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 41 - Lada </span>│   1020 │    1080° │ RWD       │ 1500/150… │ 990/990/… │ Updated  │
+│<span class="r3"> VFTS GrpB </span>│        │          │           │           │           │          │
+│<span class="r3"> 67 - Audi </span>│   1300 │     900° │ AWD w/o   │ 1500/150… │ 1193/119… │ Updated  │
+│<span class="r3"> quattro   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> A2 GrpB   </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r5"> 59 -      </span>│<span class="r6">    939 </span>│<span class="r6">     900° </span>│<span class="r6"> FWD       </span>│<span class="r6"> 800/800/… </span>│<span class="r6"> 800/800/… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Skoda     </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> Favorit   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r5"> 136 L     </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r5"> GrpA      </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r3"> 105 -     </span>│   1349 │    1007° │ RWD       │ 1500/150… │ 1615/161… │ Updated  │
+│<span class="r3"> Volvo 240 </span>│        │          │           │           │           │          │
+│<span class="r3"> Turbo     </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 47 -      </span>│   1610 │     778° │ AWD w/o   │ 1500/150… │ 1845/184… │ Updated  │
+│<span class="r3"> Subaru    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Impreza   </span>│        │          │ split     │           │           │          │
+│<span class="r3"> N14 N4    </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 72 - Audi </span>│   1449 │     958° │ AWD w/o   │ 1500/150… │ 1217/121… │ Updated  │
+│<span class="r3"> 200       </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> quattro   </span>│        │          │ split     │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 16 -      </span>│   1390 │     540° │ AWD with  │ 1500/150… │ 1419/141… │ Updated  │
+│<span class="r3"> Toyota    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Yaris WRC </span>│        │          │ split     │           │           │          │
+│<span class="r3"> 2018      </span>│        │          │           │           │           │          │
+│<span class="r3"> 74 -      </span>│   1300 │     842° │ AWD w/o   │ 1500/150… │ 1231/123… │ Updated  │
+│<span class="r3"> Mazda 323 </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> BF 4WD    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Turbo     </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 20 -      </span>│    780 │     756° │ FWD       │ 1500/150… │  50/50/50 │ Updated  │
+│<span class="r3"> Trabant P </span>│        │          │           │           │           │          │
+│<span class="r3"> 800 RS    </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 90 -      </span>│   1400 │     540° │ AWD w/o   │ 1500/150… │ 1437/143… │ Updated  │
+│<span class="r3"> Peugeot   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> 207 S2000 </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Evolution </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> Plus      </span>│        │          │           │           │           │          │
+│<span class="r3"> 73 -      </span>│   1400 │     720° │ AWD with  │ 1500/150… │ 1393/139… │ Updated  │
+│<span class="r3"> Lancia    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Delta HF  </span>│        │          │ split     │           │           │          │
+│<span class="r3"> 4WD GrpA  </span>│        │          │           │           │           │          │
+│<span class="r3"> 50 -      </span>│   1400 │     943° │ RWD       │ 1500/150… │ 1689/168… │ Updated  │
+│<span class="r3"> Porsche   </span>│        │          │           │           │           │          │
+│<span class="r3"> 911 GT3   </span>│        │          │           │           │           │          │
+│<span class="r3"> RS (2010) </span>│        │          │           │           │           │          │
+│<span class="r3"> RGT       </span>│        │          │           │           │           │          │
+│<span class="r5"> 66 - Audi </span>│<span class="r6">   1340 </span>│<span class="r6">     900° </span>│<span class="r6"> AWD w/o   </span>│<span class="r6"> 1200/120… </span>│<span class="r6"> 1200/120… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> quattro   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> torque    </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> A1 GrpB   </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> split     </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r5">           </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> (50:50)   </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r3"> 17 - Fiat </span>│    729 │     835° │ RWD       │ 1500/150… │  50/50/50 │ Updated  │
+│<span class="r3"> 126 Grp2  </span>│        │          │           │           │           │          │
+│<span class="r5"> 81 - Ford </span>│<span class="r6">   1430 </span>│<span class="r6">     478° </span>│<span class="r6"> AWD w/o   </span>│<span class="r6"> 1500/150… </span>│<span class="r6"> 1500/150… </span>│<span class="r6"> Skipped  </span>│
+│<span class="r5"> Fiesta    </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> torque    </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> - Custom </span>│
+│<span class="r5"> Rally2    </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> split     </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6"> FFB      </span>│
+│<span class="r5">           </span>│<span class="r6">        </span>│<span class="r6">          </span>│<span class="r6"> (50:50)   </span>│<span class="r6">           </span>│<span class="r6">           </span>│<span class="r6">          </span>│
+│<span class="r3"> 87 - BMW  </span>│   1225 │     864° │ RWD       │ 1500/150… │ 1655/165… │ Updated  │
+│<span class="r3"> M3 E30    </span>│        │          │           │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 93 -      </span>│   1280 │     720° │ FWD       │ 1500/150… │ 1450/145… │ Updated  │
+│<span class="r3"> Renault   </span>│        │          │           │           │           │          │
+│<span class="r3"> Clio      </span>│        │          │           │           │           │          │
+│<span class="r3"> Rally4    </span>│        │          │           │           │           │          │
+│<span class="r3"> 53 -      </span>│   1319 │     720° │ AWD w/o   │ 1500/150… │ 1303/130… │ Updated  │
+│<span class="r3"> Toyota    </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Celica    </span>│        │          │ split     │           │           │          │
+│<span class="r3"> 2000GT(S… </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> GrpA      </span>│        │          │           │           │           │          │
+│<span class="r3"> 69 -      </span>│   1430 │     540° │ AWD w/o   │ 1500/150… │ 1485/148… │ Updated  │
+│<span class="r3"> Citroen   </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> C3 R5     </span>│        │          │ split     │           │           │          │
+│<span class="r3">           </span>│        │          │ (50:50)   │           │           │          │
+│<span class="r3"> 106 -     </span>│   1430 │     428° │ AWD w/o   │ 1500/150… │ 1506/150… │ Updated  │
+│<span class="r3"> Skoda     </span>│        │          │ torque    │           │           │          │
+│<span class="r3"> Fabia RS  </span>│        │          │ split     │           │           │          │
+│<span class="r3"> Rally2    </span>│        │          │ (50:50)   │           │           │          │
+└───────────┴────────┴──────────┴───────────┴───────────┴───────────┴──────────┘
 
 
 </code></pre>
