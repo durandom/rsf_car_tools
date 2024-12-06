@@ -25,11 +25,15 @@ clean:
 
 # Get version from pyproject.toml
 version:
-	@python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])"
+	@grep -m1 'version = "[^"]*"' pyproject.toml | cut -d'"' -f2
 
 # Create a new release
 release:
 	$(eval VERSION := $(shell make version))
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: Could not read version from pyproject.toml"; \
+		exit 1; \
+	fi
 	@echo "Creating release v$(VERSION)"
-	git tag "v$(VERSION)"
-	git push origin "v$(VERSION)"
+	git tag -f "v$(VERSION)"
+	git push -f origin "v$(VERSION)"
