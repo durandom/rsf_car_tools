@@ -10,9 +10,9 @@ class Car:
         """
         self.id = id
         self.name = data.get('name', '')
-        self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0))
-        self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0))
-        self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0))
+        self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0) or 0)
+        self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0) or 0)
+        self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0) or 0)
         self.ffb_predicted = data.get('ffb_predicted', '').lower() == 'true'
 
         # These will be populated from cars.json later

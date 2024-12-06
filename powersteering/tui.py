@@ -68,9 +68,12 @@ class StatsView(Static):
         ffb_cars = sum(1 for car in self.ps.cars.values() if self.ps.has_custom_ffb(car))
         undriven_cars_count = len(self.ps.undriven_cars)
 
+        predicted_ffb_cars = sum(1 for car in self.ps.cars.values() if getattr(car, 'ffb_predicted', False))
+
         stats_table.add_rows([
             ("Total Cars", str(total_cars)),
             ("Cars with Custom FFB", str(ffb_cars)),
+            ("Cars with AI-Predicted FFB", str(predicted_ffb_cars)),
             ("Undriven Cars", str(undriven_cars_count))
         ])
 
