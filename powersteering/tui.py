@@ -1,8 +1,7 @@
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Static
-from textual.containers import Grid
+from textual.widgets import Footer, Static, DataTable
+from textual.containers import Grid, VerticalScroll
 from rich.text import Text
-from rich.table import Table
 from .core import PowerSteering
 from .renderer import ConsoleRenderer
 
@@ -43,8 +42,13 @@ class StatsView(Static):
     """View for displaying car statistics"""
     def __init__(self):
         super().__init__()
-        self.renderer = ConsoleRenderer(quiet=True)
         self.ps = None
+
+    def compose(self) -> ComposeResult:
+        yield VerticalScroll(
+            DataTable(id="stats-table"),
+            DataTable(id="ffb-table")
+        )
 
     def set_powersteering(self, ps: PowerSteering) -> None:
         self.ps = ps
@@ -55,27 +59,48 @@ class StatsView(Static):
             self.update("Loading...")
             return
 
-        stats_table = self.renderer.create_stats_table(
-            self.ps.cars,
-            self.ps.undriven_cars,
-            self.ps.has_custom_ffb
-        )
-        custom_ffb_table = self.renderer.create_custom_ffb_table(
-            self.ps.cars,
-            self.ps.has_custom_ffb
-        )
+        # Update stats table
+        stats_table = self.query_one("#stats-table", DataTable)
+        stats_table.clear()
+        stats_table.add_columns("Metric", "Count")
+        
+        total_cars = len(self.ps.cars)
+        ffb_cars = sum(1 for car in self.ps.cars.values() if self.ps.has_custom_ffb(car))
+        undriven_cars_count = len(self.ps.undriven_cars)
+        
+        stats_table.add_rows([
+            ("Total Cars", str(total_cars)),
+            ("Cars with Custom FFB", str(ffb_cars)),
+            ("Undriven Cars", str(undriven_cars_count))
+        ])
 
-        container = Table(show_header=False, show_edge=False, padding=1)
-        container.add_row(stats_table)
-        container.add_row(custom_ffb_table)
-        self.update(container)
+        # Update FFB table
+        ffb_table = self.query_one("#ffb-table", DataTable)
+        ffb_table.clear()
+        ffb_table.add_columns("Car", "Weight", "Steering", "Drivetrain", "FFB Settings", "Global FFB")
+        
+        for car in sorted(self.ps.cars.values(), key=lambda x: x.name):
+            if self.ps.has_custom_ffb(car):
+                ffb_table.add_row(
+                    f"{car.id} - {car.name}",
+                    str(car.weight),
+                    f"{car.steering_wheel}°",
+                    car.drive_train,
+                    f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}",
+                    f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+                )
 
 class ClusterView(Static):
     """View for displaying cluster statistics"""
     def __init__(self):
         super().__init__()
-        self.renderer = ConsoleRenderer(quiet=True)
         self.ps = None
+
+    def compose(self) -> ComposeResult:
+        yield VerticalScroll(
+            DataTable(id="cluster-stats-table"),
+            DataTable(id="selected-cars-table")
+        )
 
     def set_powersteering(self, ps: PowerSteering) -> None:
         self.ps = ps
@@ -85,18 +110,54 @@ class ClusterView(Static):
         if not self.ps:
             self.update("Loading...")
             return
-            
-        selected = self.ps.select_training_sample(3)
+
+        selected = self.ps.select_training_sample(10)
         cluster_data = self.ps.get_cluster_data(selected)
-        cluster_table = self.renderer.create_cluster_stats_table(cluster_data)
-        self.update(cluster_table)
+
+        # Update cluster stats table
+        stats_table = self.query_one("#cluster-stats-table", DataTable)
+        stats_table.clear()
+        stats_table.add_columns("Cluster", "Size", "Avg Weight", "Avg Steering", "Drivetrain Distribution")
+
+        for cluster_id, cars in sorted(cluster_data.items()):
+            weights = [car.weight for car in cars]
+            steering = [car.steering_wheel for car in cars]
+            drive_counts = {}
+            for car in cars:
+                drive_counts[car.drive_train] = drive_counts.get(car.drive_train, 0) + 1
+            drive_dist = ", ".join(f"{dt}: {count}" for dt, count in drive_counts.items())
+
+            stats_table.add_row(
+                str(cluster_id),
+                str(len(cars)),
+                f"{min(weights)}-{max(weights)} kg",
+                f"{min(steering)}-{max(steering)}°",
+                drive_dist
+            )
+
+        # Update selected cars table
+        cars_table = self.query_one("#selected-cars-table", DataTable)
+        cars_table.clear()
+        cars_table.add_columns("Cluster", "Car", "Weight", "Steering", "Drivetrain", "FFB (T/G/S)")
+
+        for car in selected:
+            cars_table.add_row(
+                str(car.cluster),
+                f"{car.id} - {car.name}",
+                str(car.weight),
+                f"{car.steering_wheel}°",
+                car.drive_train,
+                f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+            )
 
 class UndrivenView(Static):
     """View for displaying undriven cars"""
     def __init__(self):
         super().__init__()
-        self.renderer = ConsoleRenderer(quiet=True)
         self.ps = None
+
+    def compose(self) -> ComposeResult:
+        yield DataTable(id="undriven-table")
 
     def set_powersteering(self, ps: PowerSteering) -> None:
         self.ps = ps
@@ -107,8 +168,17 @@ class UndrivenView(Static):
             self.update("Loading...")
             return
 
-        undriven_table = self.renderer.create_undriven_table(self.ps.undriven_cars)
-        self.update(undriven_table)
+        table = self.query_one("#undriven-table", DataTable)
+        table.clear()
+        table.add_columns("Car", "Weight", "Steering", "Drivetrain")
+
+        for car in sorted(self.ps.undriven_cars.values(), key=lambda x: x.name):
+            table.add_row(
+                f"{car.id} - {car.name}",
+                str(car.weight),
+                f"{car.steering_wheel}°",
+                car.drive_train
+            )
 
 class MainDisplay(Static):
     """Main display area for car information and operations"""
@@ -182,6 +252,27 @@ class PowerSteeringApp(App):
         layout: grid;
         grid-size: 1;
         grid-rows: 1 1fr auto;
+    }
+
+    DataTable {
+        height: 1fr;
+        width: 100%;
+        border: solid $primary-background;
+    }
+
+    DataTable > .datatable--header {
+        background: $panel;
+        color: $text;
+    }
+
+    DataTable > .datatable--body {
+        background: $surface;
+    }
+
+    VerticalScroll {
+        height: 1fr;
+        width: 100%;
+        border: solid $primary-background;
     }
     """
 
