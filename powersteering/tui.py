@@ -63,11 +63,11 @@ class StatsView(Static):
         stats_table = self.query_one("#stats-table", DataTable)
         stats_table.clear()
         stats_table.add_columns("Metric", "Count")
-        
+
         total_cars = len(self.ps.cars)
         ffb_cars = sum(1 for car in self.ps.cars.values() if self.ps.has_custom_ffb(car))
         undriven_cars_count = len(self.ps.undriven_cars)
-        
+
         stats_table.add_rows([
             ("Total Cars", str(total_cars)),
             ("Cars with Custom FFB", str(ffb_cars)),
@@ -78,7 +78,7 @@ class StatsView(Static):
         ffb_table = self.query_one("#ffb-table", DataTable)
         ffb_table.clear()
         ffb_table.add_columns("Car", "Weight", "Steering", "Drivetrain", "FFB Settings", "Global FFB")
-        
+
         for car in sorted(self.ps.cars.values(), key=lambda x: x.name):
             if self.ps.has_custom_ffb(car):
                 ffb_table.add_row(
@@ -293,7 +293,8 @@ class PowerSteeringApp(App):
         ("s", "toggle_stats", "Statistics"),
         ("u", "toggle_undriven", "Undriven Cars"),
         ("c", "toggle_clusters", "Clusters"),
-        ("p", "toggle_predictions", "Predictions")
+        ("p", "toggle_predictions", "Predictions"),
+        ("g", "generate_ffb", "Generate & Apply FFB")
     ]
 
     CSS = """
@@ -389,4 +390,64 @@ class PowerSteeringApp(App):
         main_display = self.query_one(MainDisplay)
         main_display.show_predictions()
         self.query_one(InfoBar).notify("Generating FFB predictions...")
+
+    async def action_generate_ffb(self) -> None:
+        """Generate and apply AI FFB settings with confirmation"""
+        info_bar = self.query_one(InfoBar)
+
+        # Train models first
+        info_bar.notify("Training FFB models...")
+        models = self.ps.train_ffb_models()
+        if not models:
+            info_bar.notify("Error: No training data available")
+            return
+
+        # Generate predictions
+        cars_with_predictions = self.ps.predict_all_ffb_settings(models)
+
+        # Generate temporary file
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.ini') as temp_file:
+            temp_path = temp_file.name
+            self.ps.write_ai_ffb_file(cars_with_predictions, temp_path)
+
+        # Ask for confirmation
+        from textual.app import ComposeResult
+        from textual.containers import Center
+        from textual.screen import ModalScreen
+        from textual.widgets import Button, Label
+
+        class ConfirmationModal(ModalScreen[bool]):
+            """Screen with a dialog to confirm FFB generation."""
+
+            def compose(self) -> ComposeResult:
+                yield Grid(
+                    Label("Are you sure you want to apply AI-generated FFB settings?\nThis will backup and replace your personal.ini file.", id="question"),
+                    Button("Apply", variant="primary", id="apply"),
+                    Button("Cancel", variant="error", id="cancel"),
+                    id="dialog",
+                )
+
+            def on_button_pressed(self, event: Button.Pressed) -> None:
+                if event.button.id == "apply":
+                    self.dismiss(True)
+                else:
+                    self.dismiss(False)
+
+        def check_apply(apply: bool | None) -> None:
+            """Called when ConfirmationModal is dismissed."""
+            if apply:
+                try:
+                    self.ps.replace_personal_ini_with_predictions(temp_path)
+                    info_bar.notify("Successfully applied AI FFB settings")
+                    # Refresh to show updated values
+                    self.action_refresh()
+                except Exception as e:
+                    info_bar.notify(f"Error applying FFB settings: {str(e)}")
+            else:
+                info_bar.notify("FFB generation cancelled")
+                import os
+                os.unlink(temp_path)
+
+        await self.push_screen(ConfirmationModal(), check_apply)
 

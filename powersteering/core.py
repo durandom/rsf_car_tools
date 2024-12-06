@@ -1,6 +1,8 @@
 import os
 import json
+import shutil
 import numpy as np
+from datetime import datetime
 from io import StringIO
 from configobj import ConfigObj
 from typing import List, Tuple, Dict, Optional, TYPE_CHECKING
@@ -617,6 +619,38 @@ class PowerSteering:
 
         except Exception as e:
             raise Exception(f"Error generating AI FFB file: {str(e)}")
+
+    def replace_personal_ini_with_predictions(self, ai_file: str) -> None:
+        """Replace personal.ini with AI-generated FFB settings after making a backup.
+
+        Args:
+            ai_file: Path to the generated AI FFB file
+        """
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        dir_name = os.path.dirname(self.personal_ini)
+        base_name = os.path.basename(self.personal_ini)
+        name, ext = os.path.splitext(base_name)
+        backup_file = os.path.join(dir_name, f"{name}_{timestamp}{ext}")
+
+        try:
+            # Make backup of current personal.ini
+            logger.info(f"Creating backup of personal.ini as {backup_file}")
+            shutil.copy2(self.personal_ini, backup_file)
+
+            # Replace personal.ini with AI-generated file
+            logger.info(f"Replacing personal.ini with AI-generated settings")
+            shutil.move(ai_file, self.personal_ini)
+            logger.info(f"Successfully updated personal.ini with AI FFB settings")
+            logger.info(f"Original file backed up as: {backup_file}")
+
+        except Exception as e:
+            logger.error(f"Failed to replace personal.ini: {str(e)}")
+            if os.path.exists(backup_file):
+                logger.info(f"Restoring from backup {backup_file}")
+                with open(backup_file, 'r', encoding='utf-8') as src, \
+                     open(self.personal_ini, 'w', encoding='utf-8') as dst:
+                    dst.write(src.read())
+            raise
 
     def validate_predictions(self, models: dict) -> None:
         """Validate model predictions against known FFB settings"""

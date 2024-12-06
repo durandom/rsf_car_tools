@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "RSF App",
+            "name": "PowerSteering TUI",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/rsf_app.py",
-            "args": ["--rsf-path", "${workspaceFolder}/assets/rsf"],
+            "module": "powersteering.cli",
+            "args": ["${workspaceFolder}/assets/rsf"],
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
