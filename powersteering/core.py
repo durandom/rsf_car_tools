@@ -17,35 +17,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.cluster import KMeans
 
-def setup_logging(verbose_count: int) -> None:
-    """Configure logging level based on verbosity count
-
-    Args:
-        verbose_count: Number of times --verbose flag was specified
-            0 = INFO only
-            1 = Add WARNING
-            2 = Add DEBUG
-            3 = Add everything
-    """
-    logger.remove()  # Remove default handler
-
-    # Map verbosity count to log level using all loguru severity levels
-    levels = {
-        0: "CRITICAL",  # 50 (show only critical)
-        1: "ERROR",     # 40 (show error and above)
-        2: "WARNING",   # 30 (show warning and above)
-        3: "SUCCESS",   # 25 (show success and above)
-        4: "INFO",      # 20 (show info and above)
-        5: "DEBUG",     # 10 (show debug and above)
-        6: "TRACE"      # 5  (show everything)
-    }
-    level = levels.get(min(verbose_count, max(levels.keys())), "CRITICAL")
-    logger.add(
-        sys.stdout,
-        colorize=True,
-        level=level
-    )
-    logger.success(f"Set log level to {level} based on verbosity count {verbose_count}")
 
 class Car:
     def __init__(self, id: str, data: Dict[str, str]):
@@ -89,7 +60,7 @@ class Car:
         self.shifter_type = ''
         self.cluster = None  # Store which cluster this car belongs to
 
-class Rsf:
+class PowerSteering:
     def __init__(self, rsf_path: str, record_html: bool = False, gui_mode: bool = False):
         """Initialize RSF configuration handler
 
@@ -981,59 +952,3 @@ class Rsf:
 
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Modify RSF power polygon settings')
-    parser.add_argument('rsf_path', help='Path to RSF installation directory')
-    parser.add_argument('--verbose', '-v', action='count', default=0, help='Increase verbosity level (can be used multiple times)')
-    parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')
-    parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
-    parser.add_argument('--validate', action='store_true', help='Validate FFB predictions')
-    parser.add_argument('--undriven', action='store_true', help='List undriven cars')
-    parser.add_argument('--select-sample', type=int, nargs='?', const=3, default=None, metavar='N',
-                       help='Select N cars from each cluster for training sample (default: 3)')
-    parser.add_argument('--html', type=str, help='Save console output to HTML file')
-    parser.add_argument('--generate', action='store_true', help='Generate rallysimfans_personal_ai.ini with AI-predicted FFB settings')
-
-    args = parser.parse_args()
-    setup_logging(args.verbose)
-
-    try:
-        rsf = Rsf(args.rsf_path, record_html=bool(args.html))
-
-        if args.stats:
-            stats_list = [s.strip().lower() for s in args.stats.split(',')]
-            if 'weight' in stats_list:
-                rsf.plot_weight_stats()
-            if 'drivetrain' in stats_list:
-                rsf.plot_drivetrain_stats()
-            if 'steering' in stats_list:
-                rsf.plot_steering_stats()
-
-        if args.undriven:
-            rsf.list_undriven_cars()
-
-        if args.select_sample:
-            selected = rsf.select_training_sample(args.select_sample)
-            rsf.display_selected_sample(selected)
-
-        if args.train or args.validate or args.generate:
-            models = rsf.train_ffb_models()
-            if models:
-                if args.validate:
-                    rsf.validate_predictions(models)
-                if args.generate:
-                    output_file = os.path.join(args.rsf_path, 'rallysimfans_personal_ai.ini')
-                    rsf.generate_ai_ffb_file(models, output_file)
-
-    except FileNotFoundError as e:
-        logger.error(f"Error: {e}")
-        return 1
-    finally:
-        # Save HTML output if requested
-        if args.html:
-            rsf.console.save_html(args.html)
-
-    return 0
-
-if __name__ == '__main__':
-    exit(main())
