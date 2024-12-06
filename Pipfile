@@ -10,6 +10,7 @@ plotext = "*"
 numpy = "*"
 scikit-learn = "*"
 rich = "*"
+textual = "*"
 
 [dev-packages]
 
