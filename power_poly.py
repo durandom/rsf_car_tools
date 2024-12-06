@@ -90,16 +90,18 @@ class Car:
         self.cluster = None  # Store which cluster this car belongs to
 
 class Rsf:
-    def __init__(self, rsf_path: str, record_html: bool = False):
+    def __init__(self, rsf_path: str, record_html: bool = False, gui_mode: bool = False):
         """Initialize RSF configuration handler
 
         Args:
             rsf_path (str): Path to RSF installation directory
             record_html (bool): Whether to record console output for HTML export
+            gui_mode (bool): Whether running in GUI mode (suppresses direct console output)
         """
         self.rsf_path = rsf_path
         self.features = ['weight', 'steering_wheel', 'drive_train']  # Default features
-        self.console = Console(record=record_html)
+        self.console = Console(record=record_html, quiet=gui_mode)
+        self.gui_mode = gui_mode
 
         # Define required files
         self.personal_ini = os.path.join(rsf_path, 'rallysimfans_personal.ini')

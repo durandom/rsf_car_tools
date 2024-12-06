@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "RSF App",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/rsf_app.py",
+            "args": ["--rsf-path", "${workspaceFolder}/assets/rsf"],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ]
+}

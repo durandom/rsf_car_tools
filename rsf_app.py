@@ -46,10 +46,10 @@ class RsfApp(App):
         Binding("r", "refresh", "Refresh", show=True),
     ]
 
-    def __init__(self, rsf: Rsf):
+    def __init__(self, rsf_path: str):
         super().__init__()
-        setup_logging(0)  # Set default logging level
-        self.rsf = rsf
+        setup_logging(0)  # Set default logging level for the app
+        self.rsf = Rsf(rsf_path, record_html=True, gui_mode=True)
         self.models = None
 
     def compose(self) -> ComposeResult:
@@ -62,8 +62,11 @@ class RsfApp(App):
             Button("Generate FFB", id="generate", variant="success"),
             id="controls"
         )
-        yield RsfDisplay("Welcome to RSF FFB Manager\nSelect an action above to begin", id="display")
+        yield RsfDisplay("", id="display")
         yield Footer()
+
+        # Show initial statistics
+        self.call_after_refresh(self.show_statistics)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses"""
@@ -87,7 +90,7 @@ class RsfApp(App):
 
         # Update the display widget
         display = self.query_one("#display")
-        display.update(console.export_text())
+        display.update_content(console.export_text())
 
     def create_clusters(self) -> None:
         """Create and display clusters"""
@@ -100,7 +103,7 @@ class RsfApp(App):
 
         # Update the display widget
         display = self.query_one("#display")
-        display.update(console.export_text())
+        display.update_content(console.export_text())
 
     def train_model(self) -> None:
         """Train the FFB model and display results"""
@@ -116,13 +119,13 @@ class RsfApp(App):
 
         # Update the display widget
         display = self.query_one("#display")
-        display.update(console.export_text())
+        display.update_content(console.export_text())
 
     def generate_ffb(self) -> None:
         """Generate FFB settings file"""
         if not self.models:
             display = self.query_one("#display")
-            display.update("[red]Please train the model first![/red]")
+            display.update_content("[red]Please train the model first![/red]")
             return
 
         output_file = os.path.join(self.rsf.rsf_path, 'rallysimfans_personal_ai.ini')
@@ -134,7 +137,7 @@ class RsfApp(App):
 
         # Update the display widget
         display = self.query_one("#display")
-        display.update(console.export_text())
+        display.update_content(console.export_text())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='RSF Force Feedback Management Application')
@@ -142,6 +145,5 @@ if __name__ == "__main__":
                        help='Path to RSF installation directory (default: current working directory)')
     args = parser.parse_args()
 
-    rsf = Rsf(args.rsf_path, record_html=True)
-    app = RsfApp(rsf)
+    app = RsfApp(args.rsf_path)
     app.run()
