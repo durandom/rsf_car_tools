@@ -180,6 +180,52 @@ class UndrivenView(Static):
                 car.drive_train
             )
 
+class PredictionsView(Static):
+    """View for displaying FFB predictions"""
+    def __init__(self):
+        super().__init__()
+        self.ps = None
+
+    def compose(self) -> ComposeResult:
+        yield DataTable(id="predictions-table")
+
+    def set_powersteering(self, ps: PowerSteering) -> None:
+        self.ps = ps
+        self._update_display()
+
+    def _update_display(self) -> None:
+        if not self.ps:
+            self.update("Loading...")
+            return
+
+        table = self.query_one("#predictions-table", DataTable)
+        table.clear()
+        table.add_columns("Car", "Weight", "Steering", "Drivetrain", "Current FFB (T/G/S)", "Predicted FFB (T/G/S)", "Status")
+
+        # Train models
+        models = self.ps.train_ffb_models()
+        if not models:
+            table.add_row("No training data available")
+            return
+
+        # Get predictions
+        cars_with_predictions = self.ps.predict_all_ffb_settings(models)
+
+        for car, predictions in cars_with_predictions:
+            current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+            predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
+            status = "Skipped - Custom FFB" if self.ps.has_custom_ffb(car) else "Updated"
+
+            table.add_row(
+                f"{car.id} - {car.name}",
+                str(car.weight),
+                f"{car.steering_wheel}°",
+                car.drive_train,
+                current_ffb,
+                predicted_ffb,
+                status
+            )
+
 class MainDisplay(Static):
     """Main display area for car information and operations"""
     def __init__(self):
@@ -188,14 +234,17 @@ class MainDisplay(Static):
         self.stats_view = StatsView()
         self.undriven_view = UndrivenView()
         self.cluster_view = ClusterView()
+        self.predictions_view = PredictionsView()
         self.current_view = self.stats_view
 
     def compose(self) -> ComposeResult:
         yield self.stats_view
         yield self.undriven_view
         yield self.cluster_view
+        yield self.predictions_view
         self.undriven_view.display = False
         self.cluster_view.display = False
+        self.predictions_view.display = False
 
     def set_powersteering(self, ps: PowerSteering) -> None:
         """Set the PowerSteering instance and update display"""
@@ -203,6 +252,7 @@ class MainDisplay(Static):
         self.stats_view.set_powersteering(ps)
         self.undriven_view.set_powersteering(ps)
         self.cluster_view.set_powersteering(ps)
+        self.predictions_view.set_powersteering(ps)
 
     def show_stats(self) -> None:
         """Switch to statistics view"""
@@ -222,7 +272,16 @@ class MainDisplay(Static):
         self.stats_view.display = False
         self.undriven_view.display = False
         self.cluster_view.display = True
+        self.predictions_view.display = False
         self.current_view = self.cluster_view
+
+    def show_predictions(self) -> None:
+        """Switch to predictions view"""
+        self.stats_view.display = False
+        self.undriven_view.display = False
+        self.cluster_view.display = False
+        self.predictions_view.display = True
+        self.current_view = self.predictions_view
 
 class PowerSteeringApp(App):
     """A Textual app to manage RSF power steering settings"""
@@ -233,7 +292,8 @@ class PowerSteeringApp(App):
         ("r", "refresh", "Refresh"),
         ("s", "toggle_stats", "Statistics"),
         ("u", "toggle_undriven", "Undriven Cars"),
-        ("c", "toggle_clusters", "Clusters")
+        ("c", "toggle_clusters", "Clusters"),
+        ("p", "toggle_predictions", "Predictions")
     ]
 
     CSS = """
@@ -323,4 +383,10 @@ class PowerSteeringApp(App):
         main_display = self.query_one(MainDisplay)
         main_display.show_clusters()
         self.query_one(InfoBar).notify("Showing cluster statistics")
+
+    def action_toggle_predictions(self) -> None:
+        """Switch to predictions view"""
+        main_display = self.query_one(MainDisplay)
+        main_display.show_predictions()
+        self.query_one(InfoBar).notify("Generating FFB predictions...")
 

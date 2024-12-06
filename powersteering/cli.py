@@ -21,6 +21,8 @@ def main():
     parser.add_argument('--html', type=str, help='Save console output to HTML file')
     parser.add_argument('--generate', action='store_true',
                        help='Generate rallysimfans_personal_ai.ini with AI-predicted FFB settings')
+    parser.add_argument('--dry-run', action='store_true',
+                       help='Show predicted FFB settings without writing to file')
     parser.add_argument('--tui', type=lambda x: x.lower() == 'true', default=True,
                        help='Launch the text user interface (default: True)')
 
@@ -62,10 +64,13 @@ def main():
             if models:
                 if args.validate:
                     ps.validate_predictions(models)
-                if args.generate:
-                    output_file = os.path.join(args.rsf_path, 'rallysimfans_personal_ai.ini')
-                    cars_with_predictions = ps.generate_ai_ffb_file(models, output_file)
+                if args.generate or args.dry_run:
+                    cars_with_predictions = ps.predict_all_ffb_settings(models)
                     renderer.display_ffb_generation_results(cars_with_predictions, ps.has_custom_ffb)
+
+                    if args.generate and not args.dry_run:
+                        output_file = os.path.join(args.rsf_path, 'rallysimfans_personal_ai.ini')
+                        ps.write_ai_ffb_file(cars_with_predictions, output_file)
 
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
