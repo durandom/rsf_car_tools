@@ -4,11 +4,12 @@ from loguru import logger
 
 from .core import PowerSteering
 from .utils import setup_logging
+from .renderer import ConsoleRenderer
 
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power steering settings')
     parser.add_argument('rsf_path', help='Path to RSF installation directory')
-    parser.add_argument('--verbose', '-v', action='count', default=0, 
+    parser.add_argument('--verbose', '-v', action='count', default=0,
                        help='Increase verbosity level (can be used multiple times)')
     parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')
     parser.add_argument('--train', action='store_true', help='Train FFB prediction models')
@@ -23,24 +24,30 @@ def main():
     args = parser.parse_args()
     setup_logging(args.verbose)
 
+    renderer = ConsoleRenderer(record_html=bool(args.html))
+
     try:
-        ps = PowerSteering(args.rsf_path, record_html=bool(args.html))
+        ps = PowerSteering(args.rsf_path)
+
+        # Display initial statistics
+        renderer.display_car_statistics(ps.cars, ps.undriven_cars, ps.has_custom_ffb)
 
         if args.stats:
             stats_list = [s.strip().lower() for s in args.stats.split(',')]
             if 'weight' in stats_list:
                 ps.plot_weight_stats()
             if 'drivetrain' in stats_list:
-                ps.plot_drivetrain_stats() 
+                ps.plot_drivetrain_stats()
             if 'steering' in stats_list:
                 ps.plot_steering_stats()
 
         if args.undriven:
-            ps.list_undriven_cars()
+            renderer.display_undriven_cars(ps.undriven_cars, ps.format_car_details)
 
         if args.select_sample:
             selected = ps.select_training_sample(args.select_sample)
-            ps.display_selected_sample(selected)
+            cluster_data = ps.get_cluster_data(selected)
+            renderer.display_selected_sample(selected, cluster_data)
 
         if args.train or args.validate or args.generate:
             models = ps.train_ffb_models()
@@ -49,14 +56,15 @@ def main():
                     ps.validate_predictions(models)
                 if args.generate:
                     output_file = os.path.join(args.rsf_path, 'rallysimfans_personal_ai.ini')
-                    ps.generate_ai_ffb_file(models, output_file)
+                    cars_with_predictions = ps.generate_ai_ffb_file(models, output_file)
+                    renderer.display_ffb_generation_results(cars_with_predictions, ps.has_custom_ffb)
 
     except FileNotFoundError as e:
         logger.error(f"Error: {e}")
         return 1
     finally:
         if args.html:
-            ps.save_html(args.html)
+            renderer.save_html(args.html)
 
     return 0
 

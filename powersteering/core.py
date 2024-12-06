@@ -19,18 +19,14 @@ from sklearn.cluster import KMeans
 
 
 class PowerSteering:
-    def __init__(self, rsf_path: str, record_html: bool = False, gui_mode: bool = False):
+    def __init__(self, rsf_path: str):
         """Initialize RSF configuration handler
 
         Args:
             rsf_path (str): Path to RSF installation directory
-            record_html (bool): Whether to record console output for HTML export
-            gui_mode (bool): Whether running in GUI mode (suppresses direct console output)
         """
         self.rsf_path = rsf_path
         self.features = ['weight', 'steering_wheel', 'drive_train']  # Default features
-        self.renderer = ConsoleRenderer(record_html, gui_mode)
-        self.gui_mode = gui_mode
 
         # Define required files
         self.personal_ini = os.path.join(rsf_path, 'rallysimfans_personal.ini')
@@ -50,7 +46,6 @@ class PowerSteering:
         self._load_cars_json()
         self._load_cars_data_json()
         self.drive_map = self._build_drive_map()
-        self._log_cars_statistics()
 
     def _validate_files(self) -> None:
         """Validate that all required RSF configuration files exist.
@@ -269,10 +264,6 @@ class PowerSteering:
 
         return f"[ID: {car_id}] {model} {year} - {drive_train}"
 
-
-    def _log_cars_statistics(self) -> None:
-        """Display statistics about loaded cars"""
-        self.renderer.display_car_statistics(self.cars, self.undriven_cars, self.has_custom_ffb)
 
     def _extract_feature_values(self, car: Car) -> Optional[List[float]]:
         """Extract feature values from a car.
@@ -495,17 +486,19 @@ class PowerSteering:
         logger.info(f"Selected {len(selected_cars)} cars from {n_clusters} clusters")
         return selected_cars
 
-    def display_selected_sample(self, selected_cars: List[Car]) -> None:
-        """Display details of selected car sample and cluster statistics
+    def get_cluster_data(self, selected_cars: List[Car]) -> Dict:
+        """Get cluster data for selected cars
 
         Args:
             selected_cars: List of selected Car objects
+
+        Returns:
+            Dict mapping cluster IDs to lists of cars
         """
-        # Calculate cluster data
         cluster_data = defaultdict(list)
         features = []
         valid_cars = []
-        
+
         for car in self.cars.values():
             feature_values = self._extract_feature_values(car)
             if feature_values:
@@ -523,7 +516,7 @@ class PowerSteering:
             car.cluster = cluster_id
             cluster_data[cluster_id].append(car)
 
-        self.renderer.display_selected_sample(selected_cars, cluster_data)
+        return cluster_data
 
     def set_features(self, features: List[str]) -> None:
         """Set the features to use for training and prediction
@@ -534,19 +527,7 @@ class PowerSteering:
         self.features = features
         logger.info(f"Set features to: {features}")
 
-    def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]]) -> None:
-        """Display table of FFB generation results
-
-        Args:
-            cars_with_predictions: List of (Car, (tarmac, gravel, snow)) tuples
-        """
-        self.renderer.display_ffb_generation_results(cars_with_predictions, self.has_custom_ffb)
-
-    def list_undriven_cars(self) -> None:
-        """Display list of undriven cars with their details"""
-        self.renderer.display_undriven_cars(self.undriven_cars, self.format_car_details)
-
-    def generate_ai_ffb_file(self, models: dict, output_file: str) -> None:
+    def generate_ai_ffb_file(self, models: dict, output_file: str) -> List[Tuple[Car, Tuple[int, int, int]]]:
         """Generate a new personal.ini file with AI-predicted FFB settings
 
         Args:
@@ -555,7 +536,7 @@ class PowerSteering:
         """
         if not models:
             logger.error("No trained models available")
-            return
+            return []
 
         current_car_id = None
         current_car = None
@@ -619,15 +600,10 @@ class PowerSteering:
             logger.info(f"- Cars modified with predictions: {cars_modified}")
             logger.info(f"- Output written to: {output_file}")
 
-            # Display results table
-            self.display_ffb_generation_results(cars_with_predictions)
+            return cars_with_predictions
 
         except Exception as e:
             raise Exception(f"Error generating AI FFB file: {str(e)}")
-
-    def save_html(self, filename: str) -> None:
-        """Save console output to HTML file"""
-        self.renderer.save_html(filename)
 
     def validate_predictions(self, models: dict) -> None:
         """Validate model predictions against known FFB settings"""
