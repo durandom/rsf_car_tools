@@ -5,6 +5,7 @@ from loguru import logger
 from .core import PowerSteering
 from .utils import setup_logging
 from .renderer import ConsoleRenderer
+from .tui import PowerSteeringApp
 
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power steering settings')
@@ -20,11 +21,18 @@ def main():
     parser.add_argument('--html', type=str, help='Save console output to HTML file')
     parser.add_argument('--generate', action='store_true',
                        help='Generate rallysimfans_personal_ai.ini with AI-predicted FFB settings')
+    parser.add_argument('--tui', type=lambda x: x.lower() == 'true', default=True,
+                       help='Launch the text user interface (default: True)')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
 
     renderer = ConsoleRenderer(record_html=bool(args.html))
+
+    if args.tui:
+        app = PowerSteeringApp(args.rsf_path)
+        app.run()
+        return 0
 
     try:
         ps = PowerSteering(args.rsf_path)

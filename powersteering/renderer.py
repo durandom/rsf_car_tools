@@ -22,10 +22,9 @@ class ConsoleRenderer:
         """Save console output to HTML file"""
         self.console.save_html(filename)
 
-    def display_car_statistics(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car],
-                             has_custom_ffb_func) -> None:
-        """Display statistics about loaded cars"""
-        # Create statistics table
+    def create_stats_table(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car],
+                          has_custom_ffb_func) -> Table:
+        """Create summary statistics table"""
         table = Table(title="Car Statistics", show_header=True)
         table.add_column("Metric", style="cyan")
         table.add_column("Count", justify="right", style="green")
@@ -38,40 +37,39 @@ class ConsoleRenderer:
         table.add_row("Cars with Custom FFB", str(ffb_cars))
         table.add_row("Undriven Cars", str(undriven_cars_count))
 
-        self.console.print("\n")
-        self.console.print(table)
-        self.console.print("\n")
+        return table
 
-        # Display undriven cars table
-        undriven_table = Table(title="Undriven Cars", show_header=True)
-        undriven_table.add_column("Car", style="cyan")
-        undriven_table.add_column("Weight", justify="right")
-        undriven_table.add_column("Steering", justify="right")
-        undriven_table.add_column("Drivetrain")
+    def create_undriven_table(self, undriven_cars: Dict[str, Car]) -> Table:
+        """Create table of undriven cars"""
+        table = Table(title="Undriven Cars", show_header=True)
+        table.add_column("Car", style="cyan")
+        table.add_column("Weight", justify="right")
+        table.add_column("Steering", justify="right")
+        table.add_column("Drivetrain")
 
         for car in sorted(undriven_cars.values(), key=lambda x: x.name):
-            undriven_table.add_row(
+            table.add_row(
                 f"{car.id} - {car.name}",
                 str(car.weight),
                 f"{car.steering_wheel}°",
                 car.drive_train
             )
 
-        self.console.print(undriven_table)
-        self.console.print("\n")
+        return table
 
-        # Display cars with custom FFB settings
-        custom_ffb_table = Table(title="Cars with Custom FFB Settings", show_header=True)
-        custom_ffb_table.add_column("Car", style="cyan")
-        custom_ffb_table.add_column("Weight", justify="right")
-        custom_ffb_table.add_column("Steering", justify="right")
-        custom_ffb_table.add_column("Drivetrain")
-        custom_ffb_table.add_column("FFB Settings (T/G/S)", justify="right")
-        custom_ffb_table.add_column("Global FFB", justify="right")
+    def create_custom_ffb_table(self, cars: Dict[str, Car], has_custom_ffb_func) -> Table:
+        """Create table of cars with custom FFB settings"""
+        table = Table(title="Cars with Custom FFB Settings", show_header=True)
+        table.add_column("Car", style="cyan")
+        table.add_column("Weight", justify="right")
+        table.add_column("Steering", justify="right")
+        table.add_column("Drivetrain")
+        table.add_column("FFB Settings (T/G/S)", justify="right")
+        table.add_column("Global FFB", justify="right")
 
         for car in sorted(cars.values(), key=lambda x: x.name):
             if has_custom_ffb_func(car):
-                custom_ffb_table.add_row(
+                table.add_row(
                     f"{car.id} - {car.name}",
                     str(car.weight),
                     f"{car.steering_wheel}°",
@@ -80,7 +78,17 @@ class ConsoleRenderer:
                     f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
                 )
 
-        self.console.print(custom_ffb_table)
+        return table
+
+    def display_car_statistics(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car],
+                             has_custom_ffb_func) -> None:
+        """Display statistics about loaded cars"""
+        self.console.print("\n")
+        self.console.print(self.create_stats_table(cars, undriven_cars, has_custom_ffb_func))
+        self.console.print("\n")
+        self.console.print(self.create_undriven_table(undriven_cars))
+        self.console.print("\n")
+        self.console.print(self.create_custom_ffb_table(cars, has_custom_ffb_func))
         self.console.print("\n")
 
     def display_undriven_cars(self, undriven_cars: Dict[str, Car], format_car_details_func) -> None:

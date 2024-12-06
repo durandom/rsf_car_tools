@@ -10,7 +10,8 @@ setup(
         "plotext",
         "rich",
         "loguru",
-        "configobj"
+        "configobj",
+        "textual"
     ],
     entry_points={
         'console_scripts': [
