@@ -21,7 +21,14 @@ all: clusters predict plots
 
 # Clean generated files
 clean:
-	rm -rf out/
+	rm -rf out/ dist/ build/ *.spec
+
+# Build executable
+build:
+	python -m pip install --upgrade pip
+	pip install pyinstaller
+	pip install -e .
+	pyinstaller --name powersteering --onefile --console --collect-all powersteering --collect-all plotext powersteering/cli.py
 
 # Get version from pyproject.toml
 version:

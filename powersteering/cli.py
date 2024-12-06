@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from loguru import logger
 
 from powersteering.core import PowerSteering
@@ -82,4 +83,4 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    exit(main())
+    sys.exit(main())

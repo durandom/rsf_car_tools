@@ -12,7 +12,8 @@ dependencies = [
     "rich",
     "loguru",
     "numpy",
-    "scikit-learn",
+    "scikit-learn", 
     "configobj",
     "tomli",
+    "plotext",
 ]
