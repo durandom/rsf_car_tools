@@ -2,10 +2,10 @@ import argparse
 import os
 from loguru import logger
 
-from .core import PowerSteering
-from .utils import setup_logging
-from .renderer import ConsoleRenderer
-from .tui import PowerSteeringApp
+from powersteering.core import PowerSteering
+from powersteering.utils import setup_logging
+from powersteering.renderer import ConsoleRenderer
+from powersteering.tui import PowerSteeringApp
 
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power steering settings')
