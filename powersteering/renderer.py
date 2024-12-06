@@ -93,50 +93,36 @@ class ConsoleRenderer:
 
     def display_undriven_cars(self, undriven_cars: Dict[str, Car], format_car_details_func) -> None:
         """Display list of undriven cars with key details"""
-        table = Table(title="Undriven Cars", show_header=True)
-        table.add_column("Car Name", style="cyan")
-        table.add_column("Details", style="green")
-
-        for car_id, car in sorted(undriven_cars.items(), key=lambda x: x[1].name):
-            table.add_row(
-                car.name,
-                format_car_details_func(car)
-            )
-
+        table = self.create_undriven_table(undriven_cars)
         self.console.print("\n")
         self.console.print(table)
         self.console.print("\n")
 
-    def display_selected_sample(self, selected_cars: List[Car], cluster_data: Dict) -> None:
-        """Display details of selected car sample and cluster statistics"""
-        # First display cluster statistics
-        cluster_stats = Table(title="Cluster Statistics", show_header=True)
-        cluster_stats.add_column("Cluster", justify="right", style="magenta")
-        cluster_stats.add_column("Size", justify="right")
-        cluster_stats.add_column("Avg Weight", justify="right")
-        cluster_stats.add_column("Avg Steering", justify="right")
-        cluster_stats.add_column("Drivetrain Distribution")
-
+    def create_cluster_stats_table(self, cluster_data: Dict) -> Table:
+        """Create table showing cluster statistics"""
         from collections import defaultdict
 
-        # Calculate statistics per cluster
+        table = Table(title="Cluster Statistics", show_header=True)
+        table.add_column("Cluster", justify="right", style="magenta")
+        table.add_column("Size", justify="right")
+        table.add_column("Avg Weight", justify="right")
+        table.add_column("Avg Steering", justify="right")
+        table.add_column("Drivetrain Distribution")
+
+        # Add per-cluster statistics
         for cluster_id, cars in sorted(cluster_data.items()):
             weights = [car.weight for car in cars]
-            min_weight = min(weights)
-            max_weight = max(weights)
-            weight_dist = f"{min_weight}-{max_weight} kg"
+            weight_dist = f"{min(weights)}-{max(weights)} kg"
 
             steering = [car.steering_wheel for car in cars]
-            min_steering = min(steering)
-            max_steering = max(steering)
-            steering_dist = f"{min_steering}-{max_steering}°"
+            steering_dist = f"{min(steering)}-{max(steering)}°"
 
             drive_counts = defaultdict(int)
             for car in cars:
                 drive_counts[car.drive_train] += 1
             drive_dist = ", ".join(f"{dt}: {count}" for dt, count in drive_counts.items())
 
-            cluster_stats.add_row(
+            table.add_row(
                 str(cluster_id),
                 str(len(cars)),
                 weight_dist,
@@ -144,13 +130,10 @@ class ConsoleRenderer:
                 drive_dist
             )
 
-        # Add summary statistics
+        # Add summary row
         total_cars = sum(len(cars) for cars in cluster_data.values())
         all_weights = [car.weight for cars in cluster_data.values() for car in cars]
         all_steering = [car.steering_wheel for cars in cluster_data.values() for car in cars]
-
-        weight_dist = f"{min(all_weights)}-{max(all_weights)} kg"
-        steering_dist = f"{min(all_steering)}-{max(all_steering)}°"
 
         all_drive_counts = defaultdict(int)
         for cars in cluster_data.values():
@@ -158,21 +141,20 @@ class ConsoleRenderer:
                 all_drive_counts[car.drive_train] += 1
         all_drive_dist = ", ".join(f"{dt}: {count}" for dt, count in sorted(all_drive_counts.items()))
 
-        cluster_stats.add_row(
+        table.add_row(
             "Total",
             str(total_cars),
-            weight_dist,
-            steering_dist,
+            f"{min(all_weights)}-{max(all_weights)} kg",
+            f"{min(all_steering)}-{max(all_steering)}°",
             all_drive_dist,
             style="bold cyan"
         )
 
-        self.console.print("\n")
-        self.console.print(cluster_stats)
-        self.console.print("\n")
+        return table
 
-        # Display selected cars table
-        table = Table(title=f"Selected Training Sample ({len(cluster_data)} clusters)", show_header=True)
+    def create_selected_cars_table(self, selected_cars: List[Car], num_clusters: int) -> Table:
+        """Create table showing selected car sample"""
+        table = Table(title=f"Selected Training Sample ({num_clusters} clusters)", show_header=True)
         table.add_column("Cluster", justify="right", style="magenta")
         table.add_column("Car", style="cyan")
         table.add_column("Weight", justify="right")
@@ -197,8 +179,14 @@ class ConsoleRenderer:
                 style=row_style
             )
 
+        return table
+
+    def display_selected_sample(self, selected_cars: List[Car], cluster_data: Dict) -> None:
+        """Display details of selected car sample and cluster statistics"""
         self.console.print("\n")
-        self.console.print(table)
+        self.console.print(self.create_cluster_stats_table(cluster_data))
+        self.console.print("\n")
+        self.console.print(self.create_selected_cars_table(selected_cars, len(cluster_data)))
         self.console.print("\n")
 
     def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]],
