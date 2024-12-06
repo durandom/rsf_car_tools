@@ -46,10 +46,10 @@ class RsfApp(App):
         Binding("r", "refresh", "Refresh", show=True),
     ]
 
-    def __init__(self):
+    def __init__(self, rsf: Rsf):
         super().__init__()
         setup_logging(0)  # Set default logging level
-        self.rsf = None  # Will be set from CLI args
+        self.rsf = rsf
         self.models = None
 
     def compose(self) -> ComposeResult:
@@ -142,6 +142,6 @@ if __name__ == "__main__":
                        help='Path to RSF installation directory (default: current working directory)')
     args = parser.parse_args()
 
-    app = RsfApp()
-    app.rsf = Rsf(args.rsf_path, record_html=True)  # Override default RSF instance with CLI path
+    rsf = Rsf(args.rsf_path, record_html=True)
+    app = RsfApp(rsf)
     app.run()
