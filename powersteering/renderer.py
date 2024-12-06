@@ -189,9 +189,9 @@ class ConsoleRenderer:
         self.console.print(self.create_selected_cars_table(selected_cars, len(cluster_data)))
         self.console.print("\n")
 
-    def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]],
-                                     has_custom_ffb_func) -> None:
-        """Display table of FFB generation results"""
+    def create_ffb_results_table(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]],
+                                has_custom_ffb_func) -> Table:
+        """Create table showing FFB generation results"""
         table = Table(title="FFB Generation Results", show_header=True)
         table.add_column("Car", style="cyan")
         table.add_column("Weight", justify="right")
@@ -219,8 +219,13 @@ class ConsoleRenderer:
                 style=row_style
             )
 
+        return table
+
+    def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]],
+                                     has_custom_ffb_func) -> None:
+        """Display table of FFB generation results"""
         self.console.print("\n")
-        self.console.print(table)
+        self.console.print(self.create_ffb_results_table(cars_with_predictions, has_custom_ffb_func))
         self.console.print("\n")
 
     def _plot_numeric_histogram(self, values, title, xlabel):
