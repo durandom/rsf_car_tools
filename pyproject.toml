@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "powersteering"
+version = "0.1.0"
+description = "RSF Power Steering Configuration Tool"
+requires-python = ">=3.10"
+dependencies = [
+    "textual",
+    "rich",
+    "loguru",
+    "numpy",
+    "scikit-learn",
+    "configobj",
+]
