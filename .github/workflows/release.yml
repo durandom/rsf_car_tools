@@ -28,7 +28,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller --name powersteering --onefile --console --collect-all powersteering powersteering/cli.py
+        pyinstaller --name powersteering --onefile --console --collect-all powersteering --hidden-import importlib.resources --hidden-import importlib.resources.abc --hidden-import importlib.resources.readers powersteering/cli.py
 
     - name: Create Release
       id: create_release
