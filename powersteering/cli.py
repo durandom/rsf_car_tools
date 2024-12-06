@@ -35,11 +35,11 @@ def main():
         if args.stats:
             stats_list = [s.strip().lower() for s in args.stats.split(',')]
             if 'weight' in stats_list:
-                ps.plot_weight_stats()
+                renderer.plot_weight_stats(ps.cars)
             if 'drivetrain' in stats_list:
-                ps.plot_drivetrain_stats()
+                renderer.plot_drivetrain_stats(ps.cars)
             if 'steering' in stats_list:
-                ps.plot_steering_stats()
+                renderer.plot_steering_stats(ps.cars)
 
         if args.undriven:
             renderer.display_undriven_cars(ps.undriven_cars, ps.format_car_details)

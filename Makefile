@@ -12,8 +12,12 @@ clusters: out
 predict: out
 	python -m powersteering.cli assets/rsf --generate --html out/prediction.html
 
+# Generate statistical plots
+plots: out
+	python -m powersteering.cli assets/rsf --stats weight,drivetrain,steering --html out/plots.html
+
 # Default target
-all: clusters predict
+all: clusters predict plots
 
 # Clean generated files
 clean:

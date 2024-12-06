@@ -2,6 +2,8 @@ from rich.console import Console
 from rich.table import Table
 from typing import List, Tuple, Dict
 from loguru import logger
+from collections import Counter
+import plotext as plt
 from .models import Car
 
 class ConsoleRenderer:
@@ -174,9 +176,9 @@ class ConsoleRenderer:
         for car in selected_cars:
             if current_cluster != car.cluster:
                 current_cluster = car.cluster
-                
+
             row_style = "on grey30" if isinstance(current_cluster, int) and current_cluster % 2 == 0 else None
-            
+
             table.add_row(
                 str(car.cluster),
                 f"{car.id} - {car.name}",
@@ -224,3 +226,54 @@ class ConsoleRenderer:
         self.console.print("\n")
         self.console.print(table)
         self.console.print("\n")
+
+    def _plot_numeric_histogram(self, values, title, xlabel):
+        """Plot histogram for numeric data"""
+        if not values:
+            logger.error(f"No valid data found for {title}")
+            return
+
+        plt.clear_figure()
+        plt.hist(values, bins=10)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel("Number of Cars")
+        plt.show()
+
+    def _plot_categorical_distribution(self, values, title, xlabel):
+        """Plot bar chart for categorical data"""
+        if not values:
+            logger.error(f"No valid data found for {title}")
+            return
+
+        counts = Counter(values)
+        categories = list(counts.keys())
+        frequencies = list(counts.values())
+
+        plt.clear_figure()
+        plt.bar(categories, frequencies)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel("Number of Cars")
+        plt.show()
+
+    def plot_weight_stats(self, cars: Dict[str, Car]):
+        """Plot histogram of car weights"""
+        weights = []
+        for car in cars.values():
+            try:
+                if car.weight:
+                    weights.append(car.weight)
+            except ValueError:
+                continue
+        self._plot_numeric_histogram(weights, "Car Weight Distribution", "Weight (kg)")
+
+    def plot_drivetrain_stats(self, cars: Dict[str, Car]):
+        """Plot distribution of car drivetrains"""
+        drivetrains = [car.drive_train for car in cars.values() if car.drive_train]
+        self._plot_categorical_distribution(drivetrains, "Car Drivetrain Distribution", "Drivetrain Type")
+
+    def plot_steering_stats(self, cars: Dict[str, Car]):
+        """Plot histogram of steering wheel angles"""
+        steering_angles = [car.steering_wheel for car in cars.values() if car.steering_wheel is not None]
+        self._plot_numeric_histogram(steering_angles, "Steering Wheel Angle Distribution", "Angle (degrees)")
