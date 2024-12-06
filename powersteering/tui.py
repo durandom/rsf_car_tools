@@ -70,6 +70,27 @@ class StatsView(Static):
         container.add_row(custom_ffb_table)
         self.update(container)
 
+class ClusterView(Static):
+    """View for displaying cluster statistics"""
+    def __init__(self):
+        super().__init__()
+        self.renderer = ConsoleRenderer(quiet=True)
+        self.ps = None
+
+    def set_powersteering(self, ps: PowerSteering) -> None:
+        self.ps = ps
+        self._update_display()
+
+    def _update_display(self) -> None:
+        if not self.ps:
+            self.update("Loading...")
+            return
+            
+        selected = self.ps.select_training_sample(3)
+        cluster_data = self.ps.get_cluster_data(selected)
+        cluster_table = self.renderer.create_cluster_stats_table(cluster_data)
+        self.update(cluster_table)
+
 class UndrivenView(Static):
     """View for displaying undriven cars"""
     def __init__(self):
@@ -96,18 +117,22 @@ class MainDisplay(Static):
         self.ps = None
         self.stats_view = StatsView()
         self.undriven_view = UndrivenView()
+        self.cluster_view = ClusterView()
         self.current_view = self.stats_view
 
     def compose(self) -> ComposeResult:
         yield self.stats_view
         yield self.undriven_view
+        yield self.cluster_view
         self.undriven_view.display = False
+        self.cluster_view.display = False
 
     def set_powersteering(self, ps: PowerSteering) -> None:
         """Set the PowerSteering instance and update display"""
         self.ps = ps
         self.stats_view.set_powersteering(ps)
         self.undriven_view.set_powersteering(ps)
+        self.cluster_view.set_powersteering(ps)
 
     def show_stats(self) -> None:
         """Switch to statistics view"""
@@ -119,7 +144,15 @@ class MainDisplay(Static):
         """Switch to undriven cars view"""
         self.stats_view.display = False
         self.undriven_view.display = True
+        self.cluster_view.display = False
         self.current_view = self.undriven_view
+
+    def show_clusters(self) -> None:
+        """Switch to cluster view"""
+        self.stats_view.display = False
+        self.undriven_view.display = False
+        self.cluster_view.display = True
+        self.current_view = self.cluster_view
 
 class PowerSteeringApp(App):
     """A Textual app to manage RSF power steering settings"""
@@ -129,7 +162,8 @@ class PowerSteeringApp(App):
         ("q", "quit", "Quit"),
         ("r", "refresh", "Refresh"),
         ("s", "toggle_stats", "Statistics"),
-        ("u", "toggle_undriven", "Undriven Cars")
+        ("u", "toggle_undriven", "Undriven Cars"),
+        ("c", "toggle_clusters", "Clusters")
     ]
 
     CSS = """
@@ -192,4 +226,10 @@ class PowerSteeringApp(App):
         main_display = self.query_one(MainDisplay)
         main_display.show_undriven()
         self.query_one(InfoBar).notify("Showing undriven cars view")
+
+    def action_toggle_clusters(self) -> None:
+        """Switch to cluster view"""
+        main_display = self.query_one(MainDisplay)
+        main_display.show_clusters()
+        self.query_one(InfoBar).notify("Showing cluster statistics")
 
