@@ -10,7 +10,7 @@ from powersteering.tui import PowerSteeringApp
 
 def main():
     parser = argparse.ArgumentParser(description='Modify RSF power steering settings')
-    parser.add_argument('rsf_path', help='Path to RSF installation directory')
+    parser.add_argument('--rsf-path', help='Path to RSF installation directory', default=os.getcwd())
     parser.add_argument('--verbose', '-v', action='count', default=0,
                        help='Increase verbosity level (can be used multiple times)')
     parser.add_argument('--stats', help='Comma-separated list of statistics to plot (weight)')

@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import shutil
 import numpy as np
 from datetime import datetime
@@ -93,14 +94,16 @@ class PowerSteering:
                 # strip bom and convert ; to # for comments
                 contents = f.read()
                 contents = contents.replace('\ufeff', '')
-                contents = contents.replace(';', '#')
+                # Corrects ";" at the start of any line to "#" throughout the file.
+                # file_contents = re.sub(r'^\s*;', '#', file_contents, flags=re.MULTILINE)
+                contents = re.sub(r';', '#', contents, flags=re.MULTILINE)
 
             # Convert contents to list of strings and pass to ConfigObj
-            config = ConfigObj(StringIO(contents), encoding='utf-8')
+            config = ConfigObj(StringIO(contents), encoding='utf-8', file_error=True)
             return config
 
         except Exception as e:
-            logger.error(f"Error parsing {file}: {str(e)}")
+            logger.critical(f"Error parsing {file}: {str(e)}")
             exit(1)
 
     def _load_cars_data_json(self) -> None:
@@ -244,6 +247,9 @@ class PowerSteering:
             and were not predicted by AI, False otherwise
         """
         if car.ffb_predicted:
+            return False
+
+        if car.ffb_tarmac == 0 and car.ffb_gravel == 0 and car.ffb_snow == 0:
             return False
 
         return (car.ffb_tarmac != self.ffb_tarmac or
@@ -606,8 +612,8 @@ class PowerSteering:
                             line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
                         elif line.strip().startswith('forcefeedbacksensitivitysnow='):
                             line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
-                        # Only add ffb_predicted in car sections
-                        elif line.strip() == '' and current_car_id:  # At end of car section
+                        # Only add ffb_predicted in car sections if not already set
+                        elif line.strip() == '' and current_car_id and not current_car.ffb_predicted:
                             line = 'ffb_predicted=true\n\n'
 
                     outfile.write(line)

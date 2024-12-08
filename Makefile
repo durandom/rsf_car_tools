@@ -6,15 +6,15 @@ out:
 
 # Run clustering analysis
 clusters: out
-	python -m powersteering.cli assets/rsf --select-sample 20 --html out/clusters.html --tui=false
+	python -m powersteering.cli --select-sample 20 --html out/clusters.html --tui=false
 
 # Run prediction analysis
 predict: out
-	python -m powersteering.cli assets/rsf --generate --html out/prediction.html --tui=false
+	python -m powersteering.cli --generate --html out/prediction.html --tui=false
 
 # Generate statistical plots
 plots: out
-	python -m powersteering.cli assets/rsf --stats weight,drivetrain,steering --html out/plots.html --tui=false
+	python -m powersteering.cli --stats weight,drivetrain,steering --html out/plots.html --tui=false
 
 # Default target
 all: clusters predict plots

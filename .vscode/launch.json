@@ -6,7 +6,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "powersteering.cli",
-            "args": ["${workspaceFolder}/assets/rsf"],
+            // "args": ["${workspaceFolder}/assets/rsf"],
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {

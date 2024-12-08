@@ -1,0 +1,5 @@
+- doenst update cars w/o ffb setting (in .ini file)
+  - should set that its missing during loading
+  - when writing the .ini file, should add the missing setting
+  - add these as a statistic line
+  -
