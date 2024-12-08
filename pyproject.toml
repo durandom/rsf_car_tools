@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "powersteering"
-version = "0.1.0"
+version = "0.1.1"
 description = "RSF Power Steering Configuration Tool"
 requires-python = ">=3.10"
 dependencies = [
@@ -12,7 +12,7 @@ dependencies = [
     "rich",
     "loguru",
     "numpy",
-    "scikit-learn", 
+    "scikit-learn",
     "configobj",
     "tomli",
     "plotext",
