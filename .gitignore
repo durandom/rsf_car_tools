@@ -43,3 +43,8 @@ assets/*
 # OS specific
 .DS_Store
 Thumbs.db
+
+# rsf specific
+rsfdata/
+rallysimfans_personal*.ini
+RichardBurnsRally.ini
