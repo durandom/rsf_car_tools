@@ -61,7 +61,7 @@ class StatsView(Static):
 
         # Update stats table
         stats_table = self.query_one("#stats-table", DataTable)
-        stats_table.clear()
+        stats_table.clear(columns=True)
         stats_table.add_columns("Metric", "Count")
 
         total_cars = len(self.ps.cars)
@@ -79,7 +79,7 @@ class StatsView(Static):
 
         # Update FFB table
         ffb_table = self.query_one("#ffb-table", DataTable)
-        ffb_table.clear()
+        ffb_table.clear(columns=True)
         ffb_table.add_columns("Car", "Weight", "Steering", "Drivetrain", "FFB Settings", "Global FFB")
 
         for car in sorted(self.ps.cars.values(), key=lambda x: x.name):
@@ -90,7 +90,7 @@ class StatsView(Static):
                     f"{car.steering_wheel}°",
                     car.drive_train,
                     f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}",
-                    f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+                    f"{self.ps.ffb_tarmac}/{self.ps.ffb_gravel}/{self.ps.ffb_snow}"
                 )
 
 class ClusterView(Static):
@@ -119,7 +119,7 @@ class ClusterView(Static):
 
         # Update cluster stats table
         stats_table = self.query_one("#cluster-stats-table", DataTable)
-        stats_table.clear()
+        stats_table.clear(columns=True)
         stats_table.add_columns("Cluster", "Size", "Avg Weight", "Avg Steering", "Drivetrain Distribution")
 
         for cluster_id, cars in sorted(cluster_data.items()):
@@ -140,7 +140,7 @@ class ClusterView(Static):
 
         # Update selected cars table
         cars_table = self.query_one("#selected-cars-table", DataTable)
-        cars_table.clear()
+        cars_table.clear(columns=True)
         cars_table.add_columns("Cluster", "Car", "Weight", "Steering", "Drivetrain", "FFB (T/G/S)")
 
         for car in selected:
@@ -172,7 +172,7 @@ class UndrivenView(Static):
             return
 
         table = self.query_one("#undriven-table", DataTable)
-        table.clear()
+        table.clear(columns=True)
         table.add_columns("Car", "Weight", "Steering", "Drivetrain")
 
         for car in sorted(self.ps.undriven_cars.values(), key=lambda x: x.name):
@@ -202,7 +202,7 @@ class PredictionsView(Static):
             return
 
         table = self.query_one("#predictions-table", DataTable)
-        table.clear()
+        table.clear(columns=True)
         table.add_columns("Car", "Weight", "Steering", "Drivetrain", "Current FFB (T/G/S)", "Predicted FFB (T/G/S)", "Status")
 
         # Train models
