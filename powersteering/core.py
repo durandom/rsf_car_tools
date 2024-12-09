@@ -605,13 +605,19 @@ class PowerSteering:
                                 predictions = None
 
                     # Check for FFB settings if we have predictions for current car
-                    elif predictions and current_car and not self.has_custom_ffb(current_car):
-                        if line.strip().startswith('forcefeedbacksensitivitytarmac='):
-                            line = f'forcefeedbacksensitivitytarmac={predictions[0]}\n'
-                        elif line.strip().startswith('forcefeedbacksensitivitygravel='):
-                            line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
-                        elif line.strip().startswith('forcefeedbacksensitivitysnow='):
-                            line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
+                    elif current_car:
+                        if self.has_custom_ffb(current_car):
+                            # Remove ffb_predicted line for cars with custom FFB
+                            if line.strip().startswith('ffb_predicted='):
+                                continue
+                        elif predictions:
+                            # Apply predictions for cars without custom FFB
+                            if line.strip().startswith('forcefeedbacksensitivitytarmac='):
+                                line = f'forcefeedbacksensitivitytarmac={predictions[0]}\n'
+                            elif line.strip().startswith('forcefeedbacksensitivitygravel='):
+                                line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
+                            elif line.strip().startswith('forcefeedbacksensitivitysnow='):
+                                line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
                         # Handle ffb_predicted line
                         elif line.strip().startswith('ffb_predicted='):
                             # Keep existing ffb_predicted line
