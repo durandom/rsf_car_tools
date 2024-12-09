@@ -239,6 +239,8 @@ class MainDisplay(Static):
         self.cluster_view = ClusterView()
         self.predictions_view = PredictionsView()
         self.current_view = self.stats_view
+        self.last_sort_column = None
+        self.last_sort_reverse = False
 
     def compose(self) -> ComposeResult:
         yield self.stats_view
@@ -267,18 +269,21 @@ class MainDisplay(Static):
             return float(numbers[0]) if numbers else float('-inf')
 
         table = event.data_table
-        # column_data = [row[event.column_key] for row in table.data]
+
+        # Toggle sort direction if same column is clicked
+        if event.column_key == self.last_sort_column:
+            self.last_sort_reverse = not self.last_sort_reverse
+        else:
+            self.last_sort_reverse = False
+            self.last_sort_column = event.column_key
 
         # Check if this is a numeric column by attempting to extract numbers
         try:
-            # Test first non-empty value
-            # first_value = next(val for val in column_data if val)
-            # extract_number(first_value)
             # If successful, use numeric sorting
-            table.sort(event.column_key, key=extract_number)
+            table.sort(event.column_key, key=extract_number, reverse=self.last_sort_reverse)
         except (StopIteration, IndexError, ValueError):
             # Fall back to string sorting for non-numeric columns
-            table.sort(event.column_key)
+            table.sort(event.column_key, reverse=self.last_sort_reverse)
 
     def show_stats(self) -> None:
         """Switch to statistics view"""
