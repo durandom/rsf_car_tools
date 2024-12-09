@@ -65,10 +65,10 @@ class StatsView(Static):
         stats_table.add_columns("Metric", "Count")
 
         total_cars = len(self.ps.cars)
-        ffb_cars = sum(1 for car in self.ps.cars.values() if self.ps.has_custom_ffb(car))
+        ffb_cars = sum(1 for car in self.ps.cars.values() if car.has_custom_ffb())
         undriven_cars_count = len(self.ps.undriven_cars)
 
-        predicted_ffb_cars = sum(1 for car in self.ps.cars.values() if getattr(car, 'ffb_predicted', False))
+        predicted_ffb_cars = sum(1 for car in self.ps.cars.values() if car.ffb_predicted)
 
         stats_table.add_rows([
             ("Total Cars", str(total_cars)),
@@ -83,7 +83,7 @@ class StatsView(Static):
         ffb_table.add_columns("Car", "Weight", "Steering", "Drivetrain", "FFB Settings", "Global FFB")
 
         for car in sorted(self.ps.cars.values(), key=lambda x: x.name):
-            if self.ps.has_custom_ffb(car):
+            if car.has_custom_ffb():
                 ffb_table.add_row(
                     f"{car.id} - {car.name}",
                     str(car.weight),
@@ -217,7 +217,7 @@ class PredictionsView(Static):
         for car, predictions in cars_with_predictions:
             current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
             predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
-            status = "Skipped - Custom FFB" if self.ps.has_custom_ffb(car) else "Updated"
+            status = "Skipped - Custom FFB" if car.has_custom_ffb() else "Updated"
 
             table.add_row(
                 f"{car.id} - {car.name}",

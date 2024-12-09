@@ -233,28 +233,6 @@ class PowerSteering:
         except Exception as e:
             logger.error(f"Error loading cars.json: {str(e)}")
 
-    def has_custom_ffb(self, car: Car) -> bool:
-        """Check if a car has custom force feedback settings different from global defaults.
-
-        Compares the car's individual tarmac, gravel and snow FFB settings against
-        the global defaults from RichardBurnsRally.ini.
-
-        Args:
-            car: Car object to check for custom FFB settings
-
-        Returns:
-            True if the car has any FFB settings that differ from global defaults
-            and were not predicted by AI, False otherwise
-        """
-        if car.ffb_predicted:
-            return False
-
-        if car.ffb_tarmac == 0 and car.ffb_gravel == 0 and car.ffb_snow == 0:
-            return False
-
-        return (car.ffb_tarmac != self.ffb_tarmac or
-                car.ffb_gravel != self.ffb_gravel or
-                car.ffb_snow != self.ffb_snow)
 
     def format_car_details(self, car: Car) -> str:
         """Format car details for display
@@ -315,7 +293,7 @@ class PowerSteering:
         targets = []
 
         for car in self.cars.values():
-            if self.has_custom_ffb(car):
+            if car.has_custom_ffb():
                 feature_values = self._extract_feature_values(car)
                 if feature_values:
                     features.append(feature_values)
@@ -592,21 +570,24 @@ class PowerSteering:
                             current_car = self.cars.get(current_car_id)
                             cars_processed += 1
 
-                            if current_car:
+                            if current_car and not current_car.has_custom_ffb():
                                 # Find predictions for this car from cars_with_predictions
                                 predictions = next((pred for car, pred in cars_with_predictions
                                                  if car.id == current_car_id), None)
-                                if predictions and not self.has_custom_ffb(current_car):
+                                if predictions:
                                     cars_modified += 1
                                     logger.debug(f"Set predicted FFB for car {current_car_id}: "
                                                f"T:{predictions[0]} G:{predictions[1]} S:{predictions[2]}")
+                                else:
+                                    logger.critical(f"Car {current_car_id} found in personal.ini but not in predictions")
+                                    raise Exception(f"Car {current_car_id} found in personal.ini but not in predictions")
                             else:
                                 logger.warning(f"Car {current_car_id} found in personal.ini but not in cars.json")
                                 predictions = None
 
                     # Check for FFB settings if we have predictions for current car
                     elif current_car:
-                        if self.has_custom_ffb(current_car):
+                        if current_car.has_custom_ffb():
                             # Remove ffb_predicted line for cars with custom FFB
                             if line.strip().startswith('ffb_predicted='):
                                 continue
@@ -618,14 +599,15 @@ class PowerSteering:
                                 line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
                             elif line.strip().startswith('forcefeedbacksensitivitysnow='):
                                 line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
-                        # Handle ffb_predicted line
-                        elif line.strip().startswith('ffb_predicted='):
-                            # Keep existing ffb_predicted line
-                            predictions = None  # Prevent adding another one at section end
-                        # Add predicted values at end of car section if not already set
-                        elif line.strip() == '' and current_car_id and predictions:
-                            line = f'ffb_predicted={predictions[0]},{predictions[1]},{predictions[2]}\n\n'
-                            predictions = None  # Prevent adding another one later
+                            # Handle ffb_predicted line
+                            elif line.strip().startswith('ffb_predicted='):
+                                # Keep existing ffb_predicted line
+                                line = f'ffb_predicted={predictions[0]},{predictions[1]},{predictions[2]}\n\n'
+                                predictions = None  # Prevent adding another one at section end
+                            # Add predicted values at end of car section if not already set
+                            elif line.strip() == '':
+                                line = f'ffb_predicted={predictions[0]},{predictions[1]},{predictions[2]}\n\n'
+                                predictions = None  # Prevent adding another one later
 
                     outfile.write(line)
 
@@ -675,7 +657,7 @@ class PowerSteering:
         total = 0
 
         for car in self.cars.values():
-            if self.has_custom_ffb(car):
+            if car.has_custom_ffb():
 
                 pred_tarmac, pred_gravel, pred_snow = self.predict_ffb_settings(car, models)
 

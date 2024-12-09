@@ -63,3 +63,24 @@ class Car:
         self.year = ''
         self.shifter_type = ''
         self.cluster = None  # Store which cluster this car belongs to
+
+    def has_custom_ffb(self) -> bool:
+        """Check if car has custom force feedback settings different from global defaults.
+
+        Args:
+            global_ffb_tarmac: Global default tarmac FFB setting
+            global_ffb_gravel: Global default gravel FFB setting
+            global_ffb_snow: Global default snow FFB setting
+
+        Returns:
+            True if the car has any FFB settings that differ from global defaults
+            and were not predicted by AI, False otherwise
+        """
+
+        # no custom FFB settings for this car
+        if self.ffb_tarmac == 0 and self.ffb_gravel == 0 and self.ffb_snow == 0:
+            return False
+
+        return (self.ffb_tarmac != self.ffb_tarmac_predicted or
+                self.ffb_gravel != self.ffb_gravel_predicted or
+                self.ffb_snow != self.ffb_snow_predicted)

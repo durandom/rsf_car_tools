@@ -41,7 +41,7 @@ def main():
         ps = PowerSteering(args.rsf_path)
 
         # Display initial statistics
-        renderer.display_car_statistics(ps.cars, ps.undriven_cars, ps.has_custom_ffb)
+        renderer.display_car_statistics(ps.cars, ps.undriven_cars)
 
         if args.stats:
             stats_list = [s.strip().lower() for s in args.stats.split(',')]
@@ -67,7 +67,7 @@ def main():
                     ps.validate_predictions(models)
                 if args.generate or args.dry_run:
                     cars_with_predictions = ps.predict_all_ffb_settings(models)
-                    renderer.display_ffb_generation_results(cars_with_predictions, ps.has_custom_ffb)
+                    renderer.display_ffb_generation_results(cars_with_predictions)
 
                     if args.generate and not args.dry_run:
                         output_file = os.path.join(args.rsf_path, 'rallysimfans_personal_ai.ini')

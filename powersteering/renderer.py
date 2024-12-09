@@ -22,15 +22,14 @@ class ConsoleRenderer:
         """Save console output to HTML file"""
         self.console.save_html(filename)
 
-    def create_stats_table(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car],
-                          has_custom_ffb_func) -> Table:
+    def create_stats_table(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car]) -> Table:
         """Create summary statistics table"""
         table = Table(title="Car Statistics", show_header=True)
         table.add_column("Metric", style="cyan")
         table.add_column("Count", justify="right", style="green")
 
         total_cars = len(cars)
-        ffb_cars = sum(1 for car in cars.values() if has_custom_ffb_func(car))
+        ffb_cars = sum(1 for car in cars.values() if car.has_custom_ffb())
         undriven_cars_count = len(undriven_cars)
 
         table.add_row("Total Cars", str(total_cars))
@@ -57,7 +56,7 @@ class ConsoleRenderer:
 
         return table
 
-    def create_custom_ffb_table(self, cars: Dict[str, Car], has_custom_ffb_func) -> Table:
+    def create_custom_ffb_table(self, cars: Dict[str, Car]) -> Table:
         """Create table of cars with custom FFB settings"""
         table = Table(title="Cars with Custom FFB Settings", show_header=True)
         table.add_column("Car", style="cyan")
@@ -68,7 +67,7 @@ class ConsoleRenderer:
         table.add_column("Global FFB", justify="right")
 
         for car in sorted(cars.values(), key=lambda x: x.name):
-            if has_custom_ffb_func(car):
+            if car.has_custom_ffb():
                 table.add_row(
                     f"{car.id} - {car.name}",
                     str(car.weight),
@@ -80,15 +79,14 @@ class ConsoleRenderer:
 
         return table
 
-    def display_car_statistics(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car],
-                             has_custom_ffb_func) -> None:
+    def display_car_statistics(self, cars: Dict[str, Car], undriven_cars: Dict[str, Car]) -> None:
         """Display statistics about loaded cars"""
         self.console.print("\n")
-        self.console.print(self.create_stats_table(cars, undriven_cars, has_custom_ffb_func))
+        self.console.print(self.create_stats_table(cars, undriven_cars))
         self.console.print("\n")
         self.console.print(self.create_undriven_table(undriven_cars))
         self.console.print("\n")
-        self.console.print(self.create_custom_ffb_table(cars, has_custom_ffb_func))
+        self.console.print(self.create_custom_ffb_table(cars))
         self.console.print("\n")
 
     def display_undriven_cars(self, undriven_cars: Dict[str, Car], format_car_details_func) -> None:
@@ -189,8 +187,7 @@ class ConsoleRenderer:
         self.console.print(self.create_selected_cars_table(selected_cars, len(cluster_data)))
         self.console.print("\n")
 
-    def create_ffb_results_table(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]],
-                                has_custom_ffb_func) -> Table:
+    def create_ffb_results_table(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]]) -> Table:
         """Create table showing FFB generation results"""
         table = Table(title="FFB Generation Results", show_header=True)
         table.add_column("Car", style="cyan")
@@ -202,11 +199,11 @@ class ConsoleRenderer:
         table.add_column("Status")
 
         for car, predictions in cars_with_predictions:
-            row_style = "on red" if has_custom_ffb_func(car) else None
+            row_style = "on red" if car.has_custom_ffb() else None
 
             current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
             predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
-            status = "Skipped - Custom FFB" if has_custom_ffb_func(car) else "Updated"
+            status = "Skipped - Custom FFB" if car.has_custom_ffb() else "Updated"
 
             table.add_row(
                 f"{car.id} - {car.name}",
@@ -221,11 +218,10 @@ class ConsoleRenderer:
 
         return table
 
-    def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]],
-                                     has_custom_ffb_func) -> None:
+    def display_ffb_generation_results(self, cars_with_predictions: List[Tuple[Car, Tuple[int, int, int]]]) -> None:
         """Display table of FFB generation results"""
         self.console.print("\n")
-        self.console.print(self.create_ffb_results_table(cars_with_predictions, has_custom_ffb_func))
+        self.console.print(self.create_ffb_results_table(cars_with_predictions))
         self.console.print("\n")
 
     def _plot_numeric_histogram(self, values, title, xlabel):
