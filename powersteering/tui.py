@@ -17,8 +17,10 @@ class BaseCarTableView(Static):
         """Update the display with current data"""
         raise NotImplementedError
 
-    def _setup_car_table(self, table_id: str, columns: List[str]) -> DataTable:
+    def _setup_car_table(self, table_id: str, columns: Optional[List[str]] = None) -> DataTable:
         """Setup a DataTable with given columns"""
+        if columns is None:
+            columns = ["Id", "Car", "Weight", "Steering", "Drivetrain", "FFB Settings"]
         table = self.query_one(f"#{table_id}", DataTable)
         table.clear(columns=True)
         table.add_columns(*columns)
@@ -27,13 +29,13 @@ class BaseCarTableView(Static):
     def _format_car_row(self, car: Car, include_ffb: bool = True) -> List[str]:
         """Format car data into a row"""
         row = [
-            f"{car.id} - {car.name}",
+            f"{car.id}",
+            f"{car.name}",
             str(car.weight),
             f"{car.steering_wheel}°",
-            car.drive_train
+            car.drive_train,
+            f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
         ]
-        if include_ffb:
-            row.append(f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}")
         return row
 
 
@@ -56,7 +58,8 @@ class InfoBar(Static):
             f"Cars: {total_cars} | "
             f"Custom FFB: {ffb_cars} | "
             f"AI FFB: {predicted_ffb_cars} | "
-            f"Undriven: {undriven_cars}"
+            f"Undriven: {undriven_cars} | "
+            f"Global FFB: {ps.ffb_tarmac}/{ps.ffb_gravel}/{ps.ffb_snow}"
         )
         self._update_content()
 
@@ -99,14 +102,11 @@ class StatsView(BaseCarTableView):
             self.update("Loading...")
             return
 
-        ffb_table = self._setup_car_table("ffb-table", [
-            "Car", "Weight", "Steering", "Drivetrain", "FFB Settings", "Global FFB"
-        ])
+        ffb_table = self._setup_car_table("ffb-table")
 
         for car in sorted(self.ps.cars.values(), key=lambda x: x.name):
             if car.has_custom_ffb():
                 row = self._format_car_row(car)
-                row.append(f"{self.ps.ffb_tarmac}/{self.ps.ffb_gravel}/{self.ps.ffb_snow}")
                 ffb_table.add_row(*row)
 
 class ClusterView(Static):
@@ -187,12 +187,10 @@ class UndrivenView(BaseCarTableView):
             self.update("Loading...")
             return
 
-        table = self._setup_car_table("undriven-table", [
-            "Car", "Weight", "Steering", "Drivetrain"
-        ])
+        table = self._setup_car_table("undriven-table")
 
         for car in sorted(self.ps.undriven_cars.values(), key=lambda x: x.name):
-            table.add_row(*self._format_car_row(car, include_ffb=False))
+            table.add_row(*self._format_car_row(car))
 
 class PredictionsView(Static):
     """View for displaying FFB predictions"""
