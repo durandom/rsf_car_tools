@@ -14,9 +14,19 @@ class InfoBar(Static):
         self.notification = ""
         self._update_content()
 
-    def set_stats(self, total_cars: int, undriven_cars: int) -> None:
+    def set_stats(self, ps: PowerSteering) -> None:
         """Update the statistics display"""
-        self.stats_text = f"Cars: {total_cars} | Undriven: {undriven_cars}"
+        total_cars = len(ps.cars)
+        ffb_cars = sum(1 for car in ps.cars.values() if car.has_custom_ffb())
+        undriven_cars = len(ps.undriven_cars)
+        predicted_ffb_cars = sum(1 for car in ps.cars.values() if car.ffb_predicted)
+        
+        self.stats_text = (
+            f"Cars: {total_cars} | "
+            f"Custom FFB: {ffb_cars} | "
+            f"AI FFB: {predicted_ffb_cars} | "
+            f"Undriven: {undriven_cars}"
+        )
         self._update_content()
 
     def notify(self, message: str) -> None:
@@ -46,7 +56,6 @@ class StatsView(Static):
 
     def compose(self) -> ComposeResult:
         yield VerticalScroll(
-            DataTable(id="stats-table"),
             DataTable(id="ffb-table")
         )
 
@@ -58,24 +67,6 @@ class StatsView(Static):
         if not self.ps:
             self.update("Loading...")
             return
-
-        # Update stats table
-        stats_table = self.query_one("#stats-table", DataTable)
-        stats_table.clear(columns=True)
-        stats_table.add_columns("Metric", "Count")
-
-        total_cars = len(self.ps.cars)
-        ffb_cars = sum(1 for car in self.ps.cars.values() if car.has_custom_ffb())
-        undriven_cars_count = len(self.ps.undriven_cars)
-
-        predicted_ffb_cars = sum(1 for car in self.ps.cars.values() if car.ffb_predicted)
-
-        stats_table.add_rows([
-            ("Total Cars", str(total_cars)),
-            ("Cars with Custom FFB", str(ffb_cars)),
-            ("Cars with AI-Predicted FFB", str(predicted_ffb_cars)),
-            ("Undriven Cars", str(undriven_cars_count))
-        ])
 
         # Update FFB table
         ffb_table = self.query_one("#ffb-table", DataTable)
@@ -389,7 +380,7 @@ class PowerSteeringApp(App):
         info_bar = self.query_one(InfoBar)
         main_display = self.query_one(MainDisplay)
 
-        info_bar.set_stats(len(self.ps.cars), len(self.ps.undriven_cars))
+        info_bar.set_stats(self.ps)
         main_display.set_powersteering(self.ps)
 
     def action_refresh(self) -> None:
