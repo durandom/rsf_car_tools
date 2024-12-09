@@ -17,16 +17,16 @@ class Car:
         # Parse predicted FFB values if present
         ffb_predicted = data.get('ffb_predicted', '')
         if ffb_predicted:
-            try:
-                predicted_values = [int(x.strip()) for x in ffb_predicted.split(',')]
-                if len(predicted_values) == 3:
-                    self.ffb_tarmac_predicted = predicted_values[0]
-                    self.ffb_gravel_predicted = predicted_values[1]
-                    self.ffb_snow_predicted = predicted_values[2]
-                    self.ffb_predicted = True
-                else:
-                    self.ffb_predicted = False
-            except ValueError:
+            # ffb is a string like "['1363', '1363', '1331']"
+            # remove brackets and quotes, split by comma, and convert to integers
+            predicted_values = ffb_predicted.replace('[', '').replace(']', '').replace("'", '')
+            predicted_values = [int(x.strip()) for x in predicted_values.split(',')]
+            if len(predicted_values) == 3:
+                self.ffb_tarmac_predicted = predicted_values[0]
+                self.ffb_gravel_predicted = predicted_values[1]
+                self.ffb_snow_predicted = predicted_values[2]
+                self.ffb_predicted = True
+            else:
                 self.ffb_predicted = False
         else:
             self.ffb_predicted = False
