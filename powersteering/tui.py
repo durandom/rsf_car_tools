@@ -257,6 +257,11 @@ class MainDisplay(Static):
         self.cluster_view.set_powersteering(ps)
         self.predictions_view.set_powersteering(ps)
 
+    def on_data_table_header_selected(self, event: DataTable.HeaderSelected) -> None:
+        """Sort table when header is clicked."""
+        table = event.data_table
+        table.sort(event.column_key)
+
     def show_stats(self) -> None:
         """Switch to statistics view"""
         self.stats_view.display = True
