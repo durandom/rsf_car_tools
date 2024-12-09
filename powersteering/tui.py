@@ -259,8 +259,26 @@ class MainDisplay(Static):
 
     def on_data_table_header_selected(self, event: DataTable.HeaderSelected) -> None:
         """Sort table when header is clicked."""
+        def extract_number(value: str) -> float:
+            """Extract first number from string, handling kg and degree symbols"""
+            import re
+            # Remove kg, °, and other non-numeric characters, keeping decimal points
+            numbers = re.findall(r'-?\d+\.?\d*', value)
+            return float(numbers[0]) if numbers else float('-inf')
+
         table = event.data_table
-        table.sort(event.column_key)
+        # column_data = [row[event.column_key] for row in table.data]
+
+        # Check if this is a numeric column by attempting to extract numbers
+        try:
+            # Test first non-empty value
+            # first_value = next(val for val in column_data if val)
+            # extract_number(first_value)
+            # If successful, use numeric sorting
+            table.sort(event.column_key, key=extract_number)
+        except (StopIteration, IndexError, ValueError):
+            # Fall back to string sorting for non-numeric columns
+            table.sort(event.column_key)
 
     def show_stats(self) -> None:
         """Switch to statistics view"""
