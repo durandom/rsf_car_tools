@@ -612,9 +612,14 @@ class PowerSteering:
                             line = f'forcefeedbacksensitivitygravel={predictions[1]}\n'
                         elif line.strip().startswith('forcefeedbacksensitivitysnow='):
                             line = f'forcefeedbacksensitivitysnow={predictions[2]}\n'
-                        # Only add ffb_predicted in car sections if not already set
-                        elif line.strip() == '' and current_car_id and not current_car.ffb_predicted:
-                            line = 'ffb_predicted=true\n\n'
+                        # Handle ffb_predicted line
+                        elif line.strip().startswith('ffb_predicted='):
+                            # Keep existing ffb_predicted line
+                            predictions = None  # Prevent adding another one at section end
+                        # Add predicted values at end of car section if not already set
+                        elif line.strip() == '' and current_car_id and predictions:
+                            line = f'ffb_predicted={predictions[0]},{predictions[1]},{predictions[2]}\n\n'
+                            predictions = None  # Prevent adding another one later
 
                     outfile.write(line)
 

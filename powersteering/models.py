@@ -13,7 +13,29 @@ class Car:
         self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0) or 0)
         self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0) or 0)
         self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0) or 0)
-        self.ffb_predicted = data.get('ffb_predicted', '').lower() == 'true'
+
+        # Parse predicted FFB values if present
+        ffb_predicted = data.get('ffb_predicted', '')
+        if ffb_predicted:
+            try:
+                predicted_values = [int(x.strip()) for x in ffb_predicted.split(',')]
+                if len(predicted_values) == 3:
+                    self.ffb_tarmac_predicted = predicted_values[0]
+                    self.ffb_gravel_predicted = predicted_values[1]
+                    self.ffb_snow_predicted = predicted_values[2]
+                    self.ffb_predicted = True
+                else:
+                    self.ffb_predicted = False
+            except ValueError:
+                self.ffb_predicted = False
+        else:
+            self.ffb_predicted = False
+
+        # Initialize predicted values to 0 if not set above
+        if not hasattr(self, 'ffb_tarmac_predicted'):
+            self.ffb_tarmac_predicted = 0
+            self.ffb_gravel_predicted = 0
+            self.ffb_snow_predicted = 0
 
         # These will be populated from cars.json later
         self.path = ''
