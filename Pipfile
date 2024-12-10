@@ -14,6 +14,7 @@ textual = "*"
 
 [dev-packages]
 setuptools = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.12"

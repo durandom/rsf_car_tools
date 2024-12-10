@@ -1,4 +1,4 @@
-.PHONY: all clean clusters predict
+.PHONY: all clean clusters predict test
 
 # Create output directory
 out:
@@ -29,6 +29,9 @@ build:
 	pip install pyinstaller
 	pip install -e .
 	pyinstaller --name powersteering --onefile --console --collect-all powersteering --collect-all plotext powersteering/cli.py
+
+test:
+	python -m pytest
 
 # Get version from pyproject.toml
 version:
