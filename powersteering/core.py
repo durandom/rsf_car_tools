@@ -308,20 +308,17 @@ class PowerSteering:
         return np.array(features), np.array(targets)
 
     def create_ffb_model(self) -> Pipeline:
-        """Create a polynomial regression pipeline for FFB prediction.
+        """Create a regression pipeline for FFB prediction.
 
         Builds a scikit-learn pipeline with:
         1. StandardScaler for feature normalization
-        2. PolynomialFeatures for linear feature transformation
-        3. LinearRegression for prediction
+        2. LinearRegression for prediction
 
         Returns:
             Pipeline: Configured scikit-learn pipeline ready for training
         """
-        # Create pipeline with scaling, polynomial features, and regression
         model = Pipeline([
             ('scaler', StandardScaler()),
-            ('poly', PolynomialFeatures(degree=3)),  # Linear features only
             ('regressor', LinearRegression(fit_intercept=True))
         ])
 
@@ -334,8 +331,14 @@ class PowerSteering:
             logger.error("No valid training data found")
             return None
 
-        # Split data
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        # Scale target values
+        y_scaler = StandardScaler()
+        y_scaled = y_scaler.fit_transform(y)
+
+        # Use consistent random state for reproducibility
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y_scaled, test_size=0.2, random_state=42
+        )
 
         # Train separate model for each surface
         models = {}
@@ -348,6 +351,8 @@ class PowerSteering:
             logger.info(f"{surface.title()} model R² score: {score:.3f}")
             models[surface] = model
 
+        # Store the y_scaler for predictions
+        self.y_scaler = y_scaler
         return models
 
     def _build_drive_map(self) -> Dict[str, int]:
@@ -374,14 +379,16 @@ class PowerSteering:
 
             features = np.array([feature_values])
 
-            # Predict for each surface and ensure reasonable values
-            predictions = []
-            for surface in ['tarmac', 'gravel', 'snow']:
-                pred = models[surface].predict(features)[0]
-                # Clip prediction to reasonable range (50-2000)
-                pred = max(50, min(2000, pred))
-                predictions.append(int(round(pred)))
+            # Get scaled predictions for each surface
+            scaled_predictions = np.zeros((1, 3))
+            for i, surface in enumerate(['tarmac', 'gravel', 'snow']):
+                scaled_predictions[0, i] = models[surface].predict(features)[0]
 
+            # Inverse transform to get original scale
+            predictions = self.y_scaler.inverse_transform(scaled_predictions)[0]
+            
+            # Clip and round predictions
+            predictions = [max(50, min(2000, int(round(p)))) for p in predictions]
             ffb_tarmac, ffb_gravel, ffb_snow = predictions
 
             return (ffb_tarmac, ffb_gravel, ffb_snow)
