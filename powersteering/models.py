@@ -1,18 +1,27 @@
 from typing import Dict
 
 class Car:
-    def __init__(self, id: str, data: Dict[str, str]):
+    def __init__(self, id: str, data: Dict[str, str],
+                 global_ffb_tarmac: int = 0,
+                 global_ffb_gravel: int = 0,
+                 global_ffb_snow: int = 0):
         """Initialize car configuration
 
         Args:
             id (str): Car ID number
             data (Dict[str, str]): Car configuration data from personal.ini
+            global_ffb_tarmac (int): Global tarmac FFB setting
+            global_ffb_gravel (int): Global gravel FFB setting
+            global_ffb_snow (int): Global snow FFB setting
         """
         self.id = id
         self.name = data.get('name', '')
         self.ffb_tarmac = int(data.get('forcefeedbacksensitivitytarmac', 0) or 0)
         self.ffb_gravel = int(data.get('forcefeedbacksensitivitygravel', 0) or 0)
         self.ffb_snow = int(data.get('forcefeedbacksensitivitysnow', 0) or 0)
+        self.global_ffb_tarmac = int(global_ffb_tarmac)
+        self.global_ffb_gravel = int(global_ffb_gravel)
+        self.global_ffb_snow = int(global_ffb_snow)
 
         # Parse predicted FFB values if present
         ffb_predicted = data.get('ffb_predicted', '')
@@ -67,11 +76,6 @@ class Car:
     def has_custom_ffb(self) -> bool:
         """Check if car has custom force feedback settings different from global defaults.
 
-        Args:
-            global_ffb_tarmac: Global default tarmac FFB setting
-            global_ffb_gravel: Global default gravel FFB setting
-            global_ffb_snow: Global default snow FFB setting
-
         Returns:
             True if the car has any FFB settings that differ from global defaults
             and were not predicted by AI, False otherwise
@@ -80,6 +84,10 @@ class Car:
         # no custom FFB settings for this car
         if self.ffb_tarmac == 0 and self.ffb_gravel == 0 and self.ffb_snow == 0:
             return False
+
+        if self.global_ffb_gravel != 0 or self.global_ffb_snow != 0 or self.global_ffb_tarmac != 0:
+            if self.ffb_tarmac == self.global_ffb_tarmac and self.ffb_gravel == self.global_ffb_gravel and self.ffb_snow == self.global_ffb_snow:
+                return False
 
         return (self.ffb_tarmac != self.ffb_tarmac_predicted or
                 self.ffb_gravel != self.ffb_gravel_predicted or

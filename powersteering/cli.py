@@ -26,6 +26,8 @@ def main():
                        help='Show predicted FFB settings without writing to file')
     parser.add_argument('--tui', type=lambda x: x.lower() == 'true', default=True,
                        help='Launch the text user interface (default: True)')
+    parser.add_argument('--global-ffb', action='store_true',
+                       help='Consider global FFB values when detecting custom FFB settings')
 
     args = parser.parse_args()
     setup_logging(args.verbose)
@@ -33,12 +35,12 @@ def main():
     renderer = ConsoleRenderer(record_html=bool(args.html))
 
     if args.tui:
-        app = PowerSteeringApp(args.rsf_path)
+        app = PowerSteeringApp(args.rsf_path, global_ffb=args.global_ffb)
         app.run()
         return 0
 
     try:
-        ps = PowerSteering(args.rsf_path)
+        ps = PowerSteering(args.rsf_path, global_ffb=args.global_ffb)
 
         # Display initial statistics
         renderer.display_car_statistics(ps.cars, ps.undriven_cars)

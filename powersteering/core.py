@@ -22,13 +22,15 @@ from sklearn.cluster import KMeans
 
 
 class PowerSteering:
-    def __init__(self, rsf_path: str):
+    def __init__(self, rsf_path: str, global_ffb: bool = False):
         """Initialize RSF configuration handler
 
         Args:
             rsf_path (str): Path to RSF installation directory
+            global_ffb (bool): Consider global FFB values when detecting custom FFB
         """
         self.rsf_path = rsf_path
+        self.global_ffb = global_ffb
         self.features = ['weight', 'steering_wheel', 'drive_train']  # Default features
 
         # Define required files
@@ -44,8 +46,8 @@ class PowerSteering:
         self.ffb_tarmac = 0
         self.ffb_gravel = 0
         self.ffb_snow = 0
-        self._load_personal_ini()
         self._load_rbr_ini()
+        self._load_personal_ini()
         self._load_cars_json()
         self._load_cars_data_json()
         self.drive_map = self._build_drive_map()
@@ -200,7 +202,11 @@ class PowerSteering:
                 continue
             car_data = {str(k): str(v) for k, v in section.items()}
             logger.debug(f"Loaded car configuration: {car_id} - {car_data}")
-            self.cars[car_id] = Car(car_id, car_data)
+            if self.global_ffb:
+                self.cars[car_id] = Car(car_id, car_data,
+                                      self.ffb_tarmac, self.ffb_gravel, self.ffb_snow)
+            else:
+                self.cars[car_id] = Car(car_id, car_data)
 
     def _load_cars_json(self) -> None:
         """Load cars.json and add data to existing Car objects"""

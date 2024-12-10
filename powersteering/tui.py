@@ -377,10 +377,11 @@ class PowerSteeringApp(App):
     }
     """
 
-    def __init__(self, rsf_path: str):
+    def __init__(self, rsf_path: str, global_ffb: bool = False):
         super().__init__()
         self.rsf_path = rsf_path
-        self.ps = PowerSteering(rsf_path)
+        self.global_ffb = global_ffb
+        self.ps = PowerSteering(rsf_path, global_ffb)
 
     def compose(self) -> ComposeResult:
         yield Grid(
@@ -403,7 +404,7 @@ class PowerSteeringApp(App):
 
     def action_refresh(self) -> None:
         """Reload PowerSteering data and refresh display"""
-        self.ps = PowerSteering(self.rsf_path)
+        self.ps = PowerSteering(self.rsf_path, self.global_ffb)
         self._refresh_display()
         self.query_one(InfoBar).notify("Data refreshed")
 
