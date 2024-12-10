@@ -386,7 +386,7 @@ class PowerSteering:
 
             # Inverse transform to get original scale
             predictions = self.y_scaler.inverse_transform(scaled_predictions)[0]
-            
+
             # Clip and round predictions
             predictions = [max(50, min(2000, int(round(p)))) for p in predictions]
             ffb_tarmac, ffb_gravel, ffb_snow = predictions
