@@ -18,17 +18,17 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
-        pip install -e .
+        pip install textual rich loguru numpy scikit-learn configobj tomli plotext
 
     - name: Build executable
       run: |
-        pyinstaller --name powersteering --onefile --console --collect-all powersteering --hidden-import importlib.resources --hidden-import importlib.resources.abc --hidden-import importlib.resources.readers powersteering/cli.py
+        pyinstaller --name powersteering --onefile --console --collect-all powersteering --collect-all sklearn --collect-all numpy --collect-all textual --collect-all rich --collect-all configobj --collect-all plotext powersteering/cli.py
 
     - name: Create Release
       id: create_release
