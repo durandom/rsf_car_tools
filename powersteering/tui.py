@@ -224,9 +224,14 @@ class PredictionsView(Static):
         cars_with_predictions = self.ps.predict_all_ffb_settings(models)
 
         for car, predictions in cars_with_predictions:
-            current_ffb = f"{car.ffb_tarmac}/{car.ffb_gravel}/{car.ffb_snow}"
+            current_values = (car.ffb_tarmac, car.ffb_gravel, car.ffb_snow)
+            current_ffb = f"{current_values[0]}/{current_values[1]}/{current_values[2]}"
             predicted_ffb = f"{predictions[0]}/{predictions[1]}/{predictions[2]}"
-            status = "Skipped - Custom FFB" if car.has_custom_ffb() else "Updated"
+
+            if car.has_custom_ffb():
+                status = "Skipped - Custom FFB"
+            else:
+                status = "Updated" if current_values != predictions else "Unchanged"
 
             table.add_row(
                 f"{car.id} - {car.name}",
